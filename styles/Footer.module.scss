@@ -1,0 +1,57 @@
+.footer {
+  position: relative;
+  padding: 0;
+  bottom: 0px;
+
+  .container {
+    position: relative;
+    background-color: #000;
+    top: -10px;
+    padding: 0px 100px;
+
+    .flexContainer {
+      display: flex;
+      flex-direction: column-reverse;
+      justify-content: space-between;
+      align-items: center;
+      gap: 2em;
+
+      @media (min-width: 50em) {
+        flex-direction: row;
+      }
+
+      p {
+        margin: 0;
+        font-size: 12px;
+        font-family: "JetBrains Mono", monospace;
+      }
+    }
+
+    @media (max-width: 50em) {
+      padding: 0px 25px;
+    }
+  }
+  
+  .medium {
+    width: min(90%, 120px);
+  }
+  
+  .gutterY {
+    padding-top: 1.6rem;
+    padding-bottom: 1.6rem;
+  }
+
+  div {
+    background-color: #000;
+  }
+}
+
+.g {
+  fill: #000;
+}
+
+#logo {
+  width: 40px;
+  height: 40px;
+  margin: 0px 5px;
+}
