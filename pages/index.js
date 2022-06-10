@@ -56,7 +56,8 @@ export default function Home() {
         setTimeout(() => setTransactionInProgress(false), 2000)
       }
     })
-    return fcl.tx(transactionId).onceSealed();
+    await fcl.tx(transactionId).onceSealed();
+    getBad();
   }
 
   async function getBad() {
