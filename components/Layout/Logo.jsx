@@ -3,7 +3,7 @@ function Logo() {
   return (
     <div className="flex">
       <img id={styles.logo} src="/favicon.ico" alt="emerald city logo" />
-      <span>Link</span>
+      <span style={{color: "#38e8c6"}}>Link</span>
     </div>
   )
 }

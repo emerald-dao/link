@@ -15,7 +15,7 @@ function Footer() {
               <a><Logo /></a>
             </Link>
             <p>
-              Created by <a href="https://discord.gg/emeraldcity" target="_blank" rel="noreferrer">Emerald City DAO</a>
+              Created by <a href="https://discord.gg/emeraldcity" target="_blank" rel="noreferrer" style={{color: "#38e8c6"}}>Emerald City DAO</a>
             </p>
           </div>
         </div>
