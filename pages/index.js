@@ -1,9 +1,10 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import * as fcl from "@onflow/fcl";
-// import relinkTx from "../flow/cadence/transactions/relink.cdc"
 import { useEffect, useState } from 'react';
 import Footer from '../components/Layout/Footer';
+import { useTransaction } from '../context/TransactionContext';
+import Transaction from '../components/Transaction';
 
 fcl.config()
   .put("accessNode.api", "https://rest-mainnet.onflow.org")
@@ -12,6 +13,7 @@ fcl.config()
 export default function Home() {
   const [user, setUser] = useState({ loggedIn: false });
   const [bad, setBad] = useState([]);
+  const { setTxId, setTransactionStatus, initTransactionState, setTransactionInProgress } = useTransaction();
 
   useEffect(() => {
     fcl.currentUser.subscribe(setUser);
@@ -24,6 +26,7 @@ export default function Home() {
   }, [user])
 
   async function relink() {
+    initTransactionState();
     const transactionId = await fcl.mutate({
       cadence: `
       import FLOAT from 0x2d4c3caffbeab845
@@ -45,7 +48,15 @@ export default function Home() {
       authorizations: [fcl.authz],
       limit: 999
     });
-    console.log({ transactionId });
+    setTxId(transactionId);
+
+    fcl.tx(transactionId).subscribe((res) => {
+      setTransactionStatus(res.status);
+      if (res.status === 4) {
+        setTimeout(() => setTransactionInProgress(false), 2000)
+      }
+    })
+    return fcl.tx(transactionId).onceSealed();
   }
 
   async function getBad() {
@@ -69,7 +80,7 @@ export default function Home() {
       ]
     });
 
-    console.log({ response })
+    // setBad(response)
   }
 
   function authenticate() {
@@ -80,25 +91,62 @@ export default function Home() {
     }
   }
 
-  return (
-    <div>
-      <Head>
-        <title>Relink Tool</title>
-        <meta name="description" content="Created by Emerald City" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+  if (bad.length === 0) {
+    return (
+      <div>
+        <Head>
+          <title>Relink Tool</title>
+          <meta name="description" content="Created by Emerald City" />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
 
-      <nav>
-        <h1>ReLink</h1>
-        <button onClick={authenticate}>{user.loggedIn ? user.addr : 'Log In'}</button>
-      </nav>
+        <nav>
+          <h1>ReLink</h1>
+          <button onClick={authenticate}><span>{user.loggedIn ? user.addr : 'Log In'}</span></button>
+        </nav>
 
-      <main>
-        <button onClick={relink}>Relink your Collections</button>
-        <p>{JSON.stringify(bad)}</p>
-      </main>
+        <main>
+          <div className="middle-box green">
+            <img src="/check-mark.png" />
+            <p>Your collections are all linked correctly!</p>
+          </div>
+        </main>
 
-      <Footer />
-    </div>
-  )
+        <Footer />
+      </div>
+    )
+  } else {
+    return (
+      <div>
+        <Head>
+          <title>Relink Tool</title>
+          <meta name="description" content="Created by Emerald City" />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+
+        <nav>
+          <h1>ReLink</h1>
+          <button onClick={authenticate}><span>{user.loggedIn ? user.addr : 'Log In'}</span></button>
+        </nav>
+
+        <main>
+          <div className="middle-box">
+            <p>The following collections are not linked properly:</p>
+            <div className="incorrect-list">
+              {bad.map((incorrectCollection, i) => (
+                <div className="list-item" key={i}>
+                  <img src={`/${incorrectCollection}.png`} alt={`${incorrectCollection} logo`} />
+                  <p>{incorrectCollection}</p>
+                </div>
+              ))}
+            </div>
+            <button onClick={relink}>Relink your collections</button>
+          </div>
+        </main>
+
+        <Footer />
+        <Transaction />
+      </div>
+    )
+  }
 }
