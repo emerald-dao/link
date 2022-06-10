@@ -93,26 +93,28 @@ export default function Home() {
   }
 
   if (!user.loggedIn) {
-    <div>
-      <Head>
-        <title>Relink Tool</title>
-        <meta name="description" content="Created by Emerald City" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    return (
+      <div>
+        <Head>
+          <title>Relink Tool</title>
+          <meta name="description" content="Created by Emerald City" />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
 
-      <nav>
-        <h1>ReLink</h1>
-        <button onClick={authenticate}><span>{user.loggedIn ? user.addr : 'Log In'}</span></button>
-      </nav>
+        <nav>
+          <h1>ReLink</h1>
+          <button onClick={authenticate}><span>{user.loggedIn ? user.addr : 'Log In'}</span></button>
+        </nav>
 
-      <main>
-        <div className="middle-box green">
-          <p>Please log in.</p>
-        </div>
-      </main>
+        <main>
+          <div className="middle-box">
+            <p>Please log in.</p>
+          </div>
+        </main>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    )
   } else if (bad.length === 0) {
     return (
       <div>
@@ -152,7 +154,7 @@ export default function Home() {
         </nav>
 
         <main>
-          <div className="middle-box">
+          <div className="middle-box red">
             <p>The following collections are not linked properly:</p>
             <div className="incorrect-list">
               {bad.map((incorrectCollection, i) => (
