@@ -96,13 +96,13 @@ export default function Home() {
     return (
       <div>
         <Head>
-          <title>Relink Tool</title>
+          <title>Link</title>
           <meta name="description" content="Created by Emerald City" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
 
         <nav>
-          <h1>ReLink</h1>
+          <h1>Link</h1>
           <button onClick={authenticate}><span>{user.loggedIn ? user.addr : 'Log In'}</span></button>
         </nav>
 
@@ -119,13 +119,13 @@ export default function Home() {
     return (
       <div>
         <Head>
-          <title>Relink Tool</title>
+          <title>Link</title>
           <meta name="description" content="Created by Emerald City" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
 
         <nav>
-          <h1>ReLink</h1>
+          <h1>Link</h1>
           <button onClick={authenticate}><span>{user.loggedIn ? user.addr : 'Log In'}</span></button>
         </nav>
 
@@ -143,13 +143,13 @@ export default function Home() {
     return (
       <div>
         <Head>
-          <title>Relink Tool</title>
+          <title>Link</title>
           <meta name="description" content="Created by Emerald City" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
 
         <nav>
-          <h1>ReLink</h1>
+          <h1>Link</h1>
           <button onClick={authenticate}><span>{user.loggedIn ? user.addr : 'Log In'}</span></button>
         </nav>
 
