@@ -80,7 +80,7 @@ export default function Home() {
       ]
     });
 
-    // setBad(response)
+    setBad(response)
   }
 
   function authenticate() {
@@ -91,7 +91,28 @@ export default function Home() {
     }
   }
 
-  if (bad.length === 0) {
+  if (!user.loggedIn) {
+    <div>
+      <Head>
+        <title>Relink Tool</title>
+        <meta name="description" content="Created by Emerald City" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <nav>
+        <h1>ReLink</h1>
+        <button onClick={authenticate}><span>{user.loggedIn ? user.addr : 'Log In'}</span></button>
+      </nav>
+
+      <main>
+        <div className="middle-box green">
+          <p>Please log in.</p>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  } else if (bad.length === 0) {
     return (
       <div>
         <Head>
