@@ -32,12 +32,18 @@ export default function Home() {
       import FLOAT from 0x2d4c3caffbeab845
       import NonFungibleToken from 0x1d7e57aa55817448
       import MetadataViews from 0x1d7e57aa55817448
+      import Art from 0xd796ff17107bbff6
 
       transaction() {
         prepare(signer: AuthAccount) {
           if !signer.getCapability<&FLOAT.Collection{FLOAT.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(FLOAT.FLOATCollectionPublicPath).check() {
             signer.unlink(FLOAT.FLOATCollectionPublicPath)
             signer.link<&FLOAT.Collection{FLOAT.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(FLOAT.FLOATCollectionPublicPath, target: FLOAT.FLOATCollectionStoragePath)
+          }
+
+          if !signer.getCapability<&Art.Collection{Art.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(Art.CollectionPublicPath).check() {
+            signer.unlink(Art.CollectionPublicPath)
+            signer.link<&Art.Collection{Art.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(Art.CollectionPublicPath, target: Art.CollectionStoragePath)
           }
         }
       }
@@ -66,6 +72,7 @@ export default function Home() {
       import FLOAT from 0x2d4c3caffbeab845
       import NonFungibleToken from 0x1d7e57aa55817448
       import MetadataViews from 0x1d7e57aa55817448
+      import Art from 0xd796ff17107bbff6
 
       pub fun main(user: Address): [String] {
         let account = getAccount(user)
@@ -73,6 +80,10 @@ export default function Home() {
         if !account.getCapability<&FLOAT.Collection{FLOAT.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(FLOAT.FLOATCollectionPublicPath).check() {
           bad.append("FLOAT")
         }
+        if !account.getCapability<&Art.Collection{Art.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(Art.CollectionPublicPath).check() {
+          bad.append("Versus")
+        }
+
 
         return bad
       }
