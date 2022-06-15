@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import Footer from '../components/Layout/Footer';
 import { useTransaction } from '../context/TransactionContext';
 import Transaction from '../components/Transaction';
+import { checkScript } from '../flow/cadence/scripts/check';
+import { linkTx } from '../flow/cadence/transactions/link';
 
 fcl.config()
   .put("accessNode.api", "https://rest-mainnet.onflow.org")
@@ -28,26 +30,7 @@ export default function Home() {
   async function relink() {
     initTransactionState();
     const transactionId = await fcl.mutate({
-      cadence: `
-      import FLOAT from 0x2d4c3caffbeab845
-      import NonFungibleToken from 0x1d7e57aa55817448
-      import MetadataViews from 0x1d7e57aa55817448
-      import Art from 0xd796ff17107bbff6
-
-      transaction() {
-        prepare(signer: AuthAccount) {
-          if signer.getCapability<&FLOAT.Collection{FLOAT.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver}>(FLOAT.FLOATCollectionPublicPath).check() && !signer.getCapability<&FLOAT.Collection{FLOAT.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(FLOAT.FLOATCollectionPublicPath).check() {
-            signer.unlink(FLOAT.FLOATCollectionPublicPath)
-            signer.link<&FLOAT.Collection{FLOAT.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(FLOAT.FLOATCollectionPublicPath, target: FLOAT.FLOATCollectionStoragePath)
-          }
-
-          if signer.getCapability<&{Art.CollectionPublic}>(Art.CollectionPublicPath).check() && !signer.getCapability<&Art.Collection{Art.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(Art.CollectionPublicPath).check() {
-            signer.unlink(Art.CollectionPublicPath)
-            signer.link<&Art.Collection{Art.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(Art.CollectionPublicPath, target: Art.CollectionStoragePath)
-          }
-        }
-      }
-      `,
+      cadence: linkTx,
       args: (arg, t) => [],
       payer: fcl.authz,
       proposer: fcl.authz,
@@ -68,26 +51,7 @@ export default function Home() {
 
   async function getBad() {
     const response = await fcl.query({
-      cadence: `
-      import FLOAT from 0x2d4c3caffbeab845
-      import NonFungibleToken from 0x1d7e57aa55817448
-      import MetadataViews from 0x1d7e57aa55817448
-      import Art from 0xd796ff17107bbff6
-
-      pub fun main(user: Address): [String] {
-        let account = getAccount(user)
-        let bad: [String] = []
-        if account.getCapability<&FLOAT.Collection{FLOAT.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver}>(FLOAT.FLOATCollectionPublicPath).check() && !account.getCapability<&FLOAT.Collection{FLOAT.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(FLOAT.FLOATCollectionPublicPath).check() {
-          bad.append("FLOAT")
-        }
-        if account.getCapability<&{Art.CollectionPublic}>(Art.CollectionPublicPath).check() && !account.getCapability<&Art.Collection{Art.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(Art.CollectionPublicPath).check() {
-          bad.append("Versus")
-        }
-
-
-        return bad
-      }
-      `,
+      cadence: checkScript,
       args: (arg, t) => [
         arg(user.addr, t.Address)
       ]
