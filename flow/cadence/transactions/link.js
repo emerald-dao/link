@@ -3,6 +3,7 @@ import FLOAT from 0x2d4c3caffbeab845
 import NonFungibleToken from 0x1d7e57aa55817448
 import MetadataViews from 0x1d7e57aa55817448
 import Art from 0xd796ff17107bbff6
+import Flovatar from 0x921ea449dffec68a
 
 transaction() {
   prepare(signer: AuthAccount) {
@@ -20,6 +21,12 @@ transaction() {
         signer.unlink(GoatedGoats.CollectionPublicPath)
         signer.link<&GoatedGoats.Collection{GoatedGoats.GoatsCollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(GoatedGoats.CollectionPublicPath, target: Goat.CollectionStoragePath)
     }
+
+    if signer.borrow<&NonFungibleToken.Collection(from:Flovatar.CollectionStoragePath) != nil !signer.getCapability<&Flovatar.Collection{Flovatar.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(Flovatar.CollectionPublicPath).check() {
+        signer.unlink(Flovatar.CollectionPublicPath)
+        signer.link<&Flovatar.Collection{FlovatarCollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(Flovatar.CollectionPublicPath, target: Flovatar.CollectionStoragePath)
+    }
+
 
   }
 
