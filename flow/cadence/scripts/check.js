@@ -10,7 +10,7 @@ import FlovatarComponent from 0x921ea449dffec68a
 pub fun main(user: Address): [String] {
   let account = getAuthAccount(user)
   let bad: [String] = []
-  if account.borrow<&NonFungibleToken.Collection>(from:FLOAT.FLOATCollectionStoragePath) && !account.getCapability<&FLOAT.Collection{FLOAT.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(FLOAT.FLOATCollectionPublicPath).check() {
+  if account.borrow<&NonFungibleToken.Collection>(from:FLOAT.FLOATCollectionStoragePath) != nil && !account.getCapability<&FLOAT.Collection{FLOAT.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(FLOAT.FLOATCollectionPublicPath).check() {
     bad.append("FLOAT")
   }
 
