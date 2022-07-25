@@ -1,9 +1,11 @@
 export const linkTx = `
-import FLOAT from 0x2d4c3caffbeab845
 import NonFungibleToken from 0x1d7e57aa55817448
 import MetadataViews from 0x1d7e57aa55817448
+import FLOAT from 0x2d4c3caffbeab845
 import Art from 0xd796ff17107bbff6
+import GoatedGoats from 0x2068315349bdfce5
 import Flovatar from 0x921ea449dffec68a
+import FlovatarComponent from 0x921ea449dffec68a
 
 transaction() {
   prepare(signer: AuthAccount) {
