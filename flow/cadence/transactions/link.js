@@ -6,6 +6,7 @@ import Art from 0xd796ff17107bbff6
 import GoatedGoats from 0x2068315349bdfce5
 import Flovatar from 0x921ea449dffec68a
 import FlovatarComponent from 0x921ea449dffec68a
+import HaikuNFT from 0xf61e40c19db2a9e2
 
 transaction() {
   prepare(signer: AuthAccount) {
@@ -32,6 +33,11 @@ transaction() {
     if signer.borrow<&NonFungibleToken.Collection>(from:FlovatarComponent.CollectionStoragePath) != nil && !signer.getCapability<&FlovatarComponent.Collection{FlovatarComponent.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(FlovatarComponent.CollectionPublicPath).check() {
         signer.unlink(FlovatarComponent.CollectionPublicPath)
         signer.link<&FlovatarComponent.Collection{FlovatarComponent.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(FlovatarComponent.CollectionPublicPath, target: FlovatarComponent.CollectionStoragePath)
+    }
+
+    if signer.borrow<&NonFungibleToken.Collection>(from:HaikuNFT.HaikuCollectionStoragePath) != nil && !signer.getCapability<&HaikuNFT.Collection{HaikuNFT.HaikuCollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(HaikuNFT.HaikuCollectionPublicPath).check() {
+      signer.unlink(HaikuNFT.HaikuCollectionPublicPath)
+      signer.link<&HaikuNFT.Collection{HaikuNFT.HaikuCollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(HaikuNFT.HaikuCollectionPublicPath, target: HaikuNFT.HaikuCollectionStoragePath)
     }
   }
 }
