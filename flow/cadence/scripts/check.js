@@ -7,6 +7,9 @@ import GoatedGoats from 0x2068315349bdfce5
 import Flovatar from 0x921ea449dffec68a
 import FlovatarComponent from 0x921ea449dffec68a
 import HaikuNFT from 0xf61e40c19db2a9e2
+import SoulMadeComponent from 0x9a57dfe5c8ce609c
+import SoulMadeMain from 0x9a57dfe5c8ce609c
+import SoulMadePack from 0x9a57dfe5c8ce609c
 
 pub fun main(user: Address): [String] {
   let account = getAuthAccount(user)
@@ -33,7 +36,19 @@ pub fun main(user: Address): [String] {
 
   if account.borrow<&NonFungibleToken.Collection>(from:HaikuNFT.HaikuCollectionStoragePath) != nil && !account.getCapability<&HaikuNFT.Collection{HaikuNFT.HaikuCollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(HaikuNFT.HaikuCollectionPublicPath).check() {
     bad.append("Bitku")
-  } 
+  }
+
+if account.borrow<&NonFungibleToken.Collection>(from:SoulMadeComponent.CollectionStoragePath) != nil && !account.getCapability<&SoulMadeComponent.Collection{SoulMadeComponent.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(SoulMadeComponent.CollectionPublicPath).check() {
+    bad.append("SoulMadeComponent")
+  }
+
+if account.borrow<&NonFungibleToken.Collection>(from:SoulMadeMain.CollectionStoragePath) != nil && !account.getCapability<&SoulMadeMain.Collection{SoulMadeMain.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(SoulMadeMain.CollectionPublicPath).check() {
+    bad.append("SoulMadeMain")
+  }
+
+if account.borrow<&SoulMadePack.Collection>(from:SoulMadePack.CollectionStoragePath) != nil && !account.getCapability<&SoulMadePack.Collection{SoulMadePack.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(SoulMadePack.CollectionPublicPath).check() {
+    bad.append("SoulMadePack")
+  }    
 
 	return bad
 }
