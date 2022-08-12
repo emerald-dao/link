@@ -7,6 +7,9 @@ import GoatedGoats from 0x2068315349bdfce5
 import Flovatar from 0x921ea449dffec68a
 import FlovatarComponent from 0x921ea449dffec68a
 import HaikuNFT from 0xf61e40c19db2a9e2
+import SoulMadeComponent from 0x9a57dfe5c8ce609c
+import SoulMadeMain from 0x9a57dfe5c8ce609c
+import SoulMadePack from 0x9a57dfe5c8ce609c
 
 transaction() {
   prepare(signer: AuthAccount) {
@@ -38,6 +41,21 @@ transaction() {
     if signer.borrow<&NonFungibleToken.Collection>(from:HaikuNFT.HaikuCollectionStoragePath) != nil && !signer.getCapability<&HaikuNFT.Collection{HaikuNFT.HaikuCollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(HaikuNFT.HaikuCollectionPublicPath).check() {
       signer.unlink(HaikuNFT.HaikuCollectionPublicPath)
       signer.link<&HaikuNFT.Collection{HaikuNFT.HaikuCollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(HaikuNFT.HaikuCollectionPublicPath, target: HaikuNFT.HaikuCollectionStoragePath)
+    }
+
+    if signer.borrow<&NonFungibleToken.Collection>(from:SoulMadeComponent.CollectionStoragePath) != nil && !signer.getCapability<&SoulMadeComponent.Collection{SoulMadeComponent.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(SoulMadeComponent.CollectionPublicPath).check() {
+        signer.unlink(SoulMadeComponent.CollectionPublicPath)
+        signer.link<&SoulMadeComponent.Collection{SoulMadeComponent.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(SoulMadeComponent.CollectionPublicPath, target: SoulMadeComponent.CollectionStoragePath)
+    }
+
+    if signer.borrow<&NonFungibleToken.Collection>(from:SoulMadeMain.CollectionStoragePath) != nil && !signer.getCapability<&SoulMadeMain.Collection{SoulMadeMain.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(SoulMadeMain.CollectionPublicPath).check() {
+        signer.unlink(SoulMadeMain.CollectionPublicPath)
+        signer.link<&SoulMadeMain.Collection{SoulMadeMain.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(SoulMadeMain.CollectionPublicPath, target: SoulMadeMain.CollectionStoragePath)
+    }
+
+    if signer.borrow<&NonFungibleToken.Collection>(from:SoulMadePack.CollectionStoragePath) != nil && !signer.getCapability<&SoulMadePack.Collection{SoulMadePack.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(SoulMadePack.CollectionPublicPath).check() {
+        signer.unlink(SoulMadePack.CollectionPublicPath)
+        signer.link<&SoulMadePack.Collection{SoulMadePack.CollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(SoulMadePack.CollectionPublicPath, target: SoulMadePack.CollectionStoragePath)
     }
   }
 }
