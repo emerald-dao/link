@@ -22,6 +22,9 @@ if (!nonFungibleTokenAddress) throw "Missing NEXT_PUBLIC_NON_FUNGIBLE_TOKEN_ADDR
 const metadataViewsAddress = process.env.NEXT_PUBLIC_METADATA_VIEWS_ADDRESS
 if (!metadataViewsAddress) throw "Missing NEXT_PUBLIC_METADATA_VIEWS_ADDRESS"
 
+const nftCatalogAddress = process.env.NEXT_PUBLIC_NFTCATALOG_ADDRESS
+if (!nftCatalogAddress) throw "Missing NEXT_PUBLIC_NFTCATALOG_ADDRESS"
+
 const publicConfig = {
   chainEnv,
   accessNodeAPI,
@@ -30,7 +33,8 @@ const publicConfig = {
   flowscanURL,
   fungibleTokenAddress,
   nonFungibleTokenAddress,
-  metadataViewsAddress
+  metadataViewsAddress,
+  nftCatalogAddress
 }
 
 export default publicConfig

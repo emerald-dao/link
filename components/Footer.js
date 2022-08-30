@@ -4,7 +4,7 @@ export default function Footer() {
   return (
     <footer className="m-auto mt-60 max-w-[920px] flex flex-1 justify-center items-center py-8 border-t border-solid box-border">
       <div className="flex flex-col gap-y-2 items-center">
-        <div className="flex gap-x-2">
+        {/* <div className="flex gap-x-2">
           <a href="https://github.com/33-Labs/drizzle"
             target="_blank"
             rel="noopener noreferrer"
@@ -37,7 +37,7 @@ export default function Footer() {
               <Image src="/bayou.png" alt="" width={20} height={20} />
             </div>
           </a>
-        </div>
+        </div> */}
 
         <a
           href="https://github.com/33-Labs"

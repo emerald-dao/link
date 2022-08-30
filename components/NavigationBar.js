@@ -37,8 +37,8 @@ export default function NavigationBar(props) {
       <div className="shrink truncate flex gap-x-2 items-center">
         <button
           className="shrink truncate font-flow text-base
-          text-emerald-dark shadow-sm
-          bg-emerald-light rounded-full px-3 py-2 leading-5"
+          text-black shadow-sm
+          bg-emerald rounded-full px-3 py-2 leading-5"
           onClick={() => {
             if (user) {
               router.push(`/${user.addr}`)
@@ -49,12 +49,12 @@ export default function NavigationBar(props) {
         </button>
         <button
           type="button"
-          className="shrink-0 bg-emerald-light rounded-full p-2"
+          className="shrink-0 bg-emerald rounded-full p-2"
           onClick={() => {
             fcl.unauthenticate()
             router.push("/")
           }}>
-          <LogoutIcon className="h-5 w-5 text-emerald-dark" />
+          <LogoutIcon className="h-5 w-5 text-black" />
         </button>
       </div>
     )
