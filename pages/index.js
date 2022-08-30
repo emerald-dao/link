@@ -107,11 +107,11 @@ export default function Home(props) {
                     return (
                       <div key={name} className="flex gap-x-3 items-center justify-between w-full px-4 py-4 rounded-3xl 
             ring-1 ring-black ring-opacity-10 overflow-hidden bg-white">
-                        <div className='flex gap-x-3 items-center'>
+                        <div className='shrink truncate flex gap-x-3 items-center'>
                           <div className="h-[40px] w-[40px] relative rounded-xl overflow-hidden hidden sm:block bg-emerald">
                             <Image src={`/api/imageproxy?url=${encodeURIComponent(imageURL)}`} alt="" layout="fill" objectFit="cover" />
                           </div>
-                          <label className="font-flow font-bold text-lg truncate">{name}</label>
+                          <label className="shrink font-flow font-bold text-lg truncate">{name}</label>
                         </div>
 
                         <button
@@ -145,11 +145,11 @@ export default function Home(props) {
                     return (
                       <div key={name} className="flex gap-x-3 items-center justify-between w-full px-4 py-4 rounded-3xl 
             ring-1 ring-black ring-opacity-10 overflow-hidden bg-white">
-                        <div className='flex gap-x-3 items-center'>
+                        <div className='shrink truncate flex gap-x-3 items-center'>
                           <div className="h-[40px] w-[40px] relative rounded-xl overflow-hidden hidden sm:block bg-emerald">
                             <Image src={`/api/imageproxy?url=${encodeURIComponent(imageURL)}`} alt="" layout="fill" objectFit="cover" />
                           </div>
-                          <label className="font-flow font-bold text-lg truncate">{name}</label>
+                          <label className="shrink font-flow font-bold text-lg truncate">{name}</label>
                         </div>
                       </div>
                     )
