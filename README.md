@@ -1,21 +1,34 @@
-# Link
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-Link is a tool for NFT Collections to be properly linked.
+## Getting Started
 
-This is a DApp meant to help users re-link all of their collections that are not properly set up. For example, it is common that Blocto or a third party service improperly link collections, making it difficult to read more generally from the NonFungibleToken or MetadataViews standards.
+First, run the development server:
 
-## Add Your Own Collection
+```bash
+npm run dev
+# or
+yarn dev
+```
 
-### Step 1
-Update `./flow/cadence/scripts/check.js` to include your collection
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-### Step 2 
-Update `./flow/cadence/transactions/link.js` to include your collection
+You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
 
-### Step 3
-Add a `.png` file of your collection logo to `./public` and name it exactly the same as the string you append to `check.js` script if the collection is linked incorrectly.
+[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
 
-Ex. `FLOAT.png`, `Versus.png`
+The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
 
-## 💎 Created by Emerald City DAO
-Join our [Discord](https://discord.gg/emeraldcity)
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
