@@ -20,8 +20,8 @@ function MyApp({ Component, pageProps }) {
       <div className="bg-white text-black bg-[url('/bg.png')] bg-cover bg-center min-h-screen">
         <RecoilRoot>
           <Head>
-            <title>link | flow link tool</title>
-            <meta property="og:title" content="zzle link | flow link tool" key="title" />
+            <title>Link | NFT catalog link tool</title>
+            <meta property="og:title" content="Link | NFT catalog link tool" key="title" />
           </Head>
           <NavigationBar user={user} />
           <Component {...pageProps} user={user} />
