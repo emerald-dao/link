@@ -60,16 +60,16 @@ export default function Home(props) {
     }
   }, [catalogData])
 
-  if (catalogError) {
-    return <ErrorPage code={catalogError.statusCode} title={"Get NFTCatalog Failed"} detail={"Please check you network status and try again"} />
-  }
-
   const { data: statusData, error: statusError } = useSWR(
     (catalog && account) ? ["linkStatusFetcher", account, catalog] : null, linkStatusFetcher)
 
   useEffect(() => {
     if (statusData) { setLinkStatus(statusData) }
   }, [statusData])
+
+  if (catalogError) {
+    return <ErrorPage code={catalogError.statusCode} title={"Get NFTCatalog Failed"} detail={"Please check you network status and try again"} />
+  }
 
   if (statusError) {
     return <ErrorPage code={statusError.statusCode} title={"Get Link Status Failed"} detail={"Please check you network status and try again"} />
