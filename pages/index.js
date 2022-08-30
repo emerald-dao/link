@@ -26,6 +26,10 @@ const linkStatusFetcher = async (funcName, account, catalog) => {
 // the same cadence code, so we just handle the first one
 const sortObject = o => Object.keys(o).sort().reduce((r, k) => (r[k] = o[k], r), {})
 
+const classNames = (...classes) => {
+  return classes.filter(Boolean).join(' ')
+}
+
 const filterCatalog = (catalog) => {
   let cleaned = {}
   let contractNames = {}
@@ -39,7 +43,7 @@ const filterCatalog = (catalog) => {
 }
 
 export default function Home(props) {
-  const [, setTransactionInProgress] = useRecoilState(transactionInProgressState)
+  const [transactionInProgress, setTransactionInProgress] = useRecoilState(transactionInProgressState)
   const [, setTransactionStatus] = useRecoilState(transactionStatusState)
   const { mutate } = useSWRConfig()
 
@@ -111,10 +115,12 @@ export default function Home(props) {
                         </div>
 
                         <button
-                          className="shrink truncate font-flow text-base
-                        text-black shadow-sm font-bold w-[100px]
-                        hover:bg-emerald-dark
-                        bg-emerald rounded-full px-3 py-2 leading-5"
+                          className={
+                            classNames(
+                              transactionInProgress ? "bg-emerald-light text-gray-500" : "hover:bg-emerald-dark bg-emerald text-black",
+                              "shrink truncate font-flow text-base shadow-sm font-bold w-[100px] rounded-full px-3 py-2 leading-5"
+                            )}
+                          disabled={transactionInProgress}
                           onClick={async () => {
                             await relink(metadata, setTransactionInProgress, setTransactionStatus)
                             mutate(["linkStatusFetcher", account, catalog])
@@ -160,18 +166,19 @@ export default function Home(props) {
                     const metadata = catalog[name]
                     const imageURL = metadata.collectionDisplay.squareImage.file.url
                     return (
-                      <div key={name} className="flex gap-x-3 items-center justify-between w-full px-4 py-4 rounded-3xl 
-            ring-1 ring-black ring-opacity-10 overflow-hidden bg-white">
-                        <div className='flex gap-x-3 items-center'>
+                      <div key={name} className="w-full flex gap-x-3 items-center justify-between px-4 py-4 rounded-3xl 
+            ring-1 ring-black ring-opacity-10 bg-white overflow-hidden">
+
+                        <div className='shrink truncate w-full flex gap-x-3 items-center'>
                           <div className="h-[40px] w-[40px] relative rounded-xl overflow-hidden hidden sm:block bg-emerald">
                             <Image src={`/api/imageproxy?url=${encodeURIComponent(imageURL)}`} alt="" layout="fill" objectFit="cover" />
                           </div>
-                          <label className="font-flow font-bold text-lg truncate">{name}</label>
+                          <label className="shrink font-flow font-bold text-lg truncate">{name}</label>
                         </div>
 
                         {/* TESTONLY */}
                         {/* <button
-                          className="shrink truncate font-flow text-base
+                          className="shrink-0 truncate font-flow text-base
                         text-black shadow-sm font-bold w-[100px]
                         hover:bg-emerald-dark
                         bg-emerald rounded-full px-3 py-2 leading-5"
