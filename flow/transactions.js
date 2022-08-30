@@ -73,7 +73,6 @@ const doRelink = async (metadata) => {
   `
 
   const code = imports.concat(body)
-  console.log(code)
 
   const transactionId = await fcl.mutate({
     cadence: code,
@@ -168,7 +167,6 @@ const doBadLink = async (metadata) => {
   `
 
   const code = imports.concat(body)
-  console.log(code)
 
   const transactionId = await fcl.mutate({
     cadence: code,

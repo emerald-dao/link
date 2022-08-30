@@ -8,7 +8,7 @@ export default function Footer() {
           <Image src={`/ecdao.png`} alt="" layout="fill" objectFit="cover" />
         </div>
         <a
-          href="https://discord.gg/vE9fQ35Y"
+          href="https://discord.com/invite/emeraldcity"
           target="_blank"
           rel="noopener noreferrer"
           className="font-flow text-sm whitespace-pre"
