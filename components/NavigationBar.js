@@ -39,11 +39,6 @@ export default function NavigationBar(props) {
           className="shrink truncate font-flow text-base
           text-black shadow-sm
           bg-emerald rounded-full px-3 py-2 leading-5"
-          onClick={() => {
-            if (user) {
-              router.push(`/${user.addr}`)
-            }
-          }}
         >
           {user && user.addr}
         </button>

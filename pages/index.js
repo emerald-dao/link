@@ -83,10 +83,12 @@ export default function Home(props) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       {!account ?
-        <div className="w-full h-[300px] flex items-center justify-center">
+        <div className="w-full h-[300px] flex flex-col gap-y-8 items-center justify-center">
+          <label className="font-flow font-bold text-4xl sm:text-5xl">Explore <span className='text-emerald'>#onFlow</span></label>
+          <label className="-mt-4 font-flow font-bold text-4xl sm:text-5xl">With Right 🔗<span className='text-emerald'>Link</span></label>
           <button
             type="button"
-            className="h-12 px-6 text-base rounded-2xl font-flow font-semibold shadow-sm text-black bg-emerald hover:bg-emerald-dark"
+            className="mt-3 h-12 px-6 text-base rounded-2xl font-flow font-semibold shadow-sm text-black bg-emerald hover:bg-emerald-dark"
             onClick={fcl.logIn}
           >
             <label>Connect Wallet</label>
