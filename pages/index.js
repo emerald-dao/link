@@ -84,9 +84,13 @@ export default function Home(props) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       {!account ?
-        <div className="w-full h-[300px] flex flex-col gap-y-8 items-center justify-center">
-          <label className="font-flow font-bold text-4xl sm:text-5xl">Explore <span className='text-emerald'>#onFlow</span></label>
-          <label className="-mt-4 font-flow font-bold text-4xl sm:text-5xl">With Right 🔗<span className='text-emerald'>Link</span></label>
+        <div className="w-full h-[300px] mt-10 flex flex-col gap-y-8 items-center justify-center">
+          <label className="font-flow font-bold text-3xl sm:text-5xl">Explore <span className='text-emerald'>#onFlow</span></label>
+          <label className="-mt-4 font-flow font-bold text-3xl sm:text-5xl">with the Right 🔗<span className='text-emerald'>Link</span></label>
+          <div className="-mt-2 flex flex-col justify-center items-center">
+            <label className="font-flow text-base sm:text-lg">Make your experiences <span className='text-emerald'>#onFlow</span></label>
+            <label className="font-flow text-base sm:text-lg">smoother with the right link</label>
+          </div>
           <button
             type="button"
             className="mt-3 h-12 px-6 text-base rounded-2xl font-flow font-semibold shadow-sm text-black bg-emerald hover:bg-emerald-dark"
