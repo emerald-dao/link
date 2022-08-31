@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
 import { getLinkStatus, getNFTCatalog } from '../flow/scripts'
-import { badlink, link, relink } from '../flow/transactions'
+import { badlink, setupAccount, relink } from '../flow/transactions'
 import ErrorPage from './ErrorPage'
 import { useRecoilState } from "recoil"
 import { SpinnerCircular } from 'spinners-react'
@@ -177,6 +177,19 @@ export default function Home(props) {
                           </div>
                           <label className="shrink font-flow font-bold text-lg truncate">{name}</label>
                         </div>
+
+                        <button
+                          className="shrink-0 truncate font-flow text-base
+                        text-black shadow-sm font-bold w-[100px]
+                        hover:bg-emerald-dark
+                        bg-emerald rounded-full px-3 py-2 leading-5"
+                          onClick={async () => {
+                            await setupAccount(metadata, setTransactionInProgress, setTransactionStatus)
+                            mutate(["linkStatusFetcher", account, catalog])
+                          }}
+                        >
+                          SETUP
+                        </button>
 
                         {/* TESTONLY */}
                         {/* <button
