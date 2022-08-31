@@ -1,18 +1,12 @@
 import Head from 'next/head'
-import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import useSWR, { useSWRConfig } from 'swr'
+import useSWR from 'swr'
 import { getLinkStatus, getNFTCatalog } from '../flow/scripts'
-import { badlink, setupAccount, relink } from '../flow/transactions'
 import ErrorPage from './ErrorPage'
-import { useRecoilState } from "recoil"
 import { SpinnerCircular } from 'spinners-react'
-import {
-  transactionInProgressState,
-  transactionStatusState
-} from "../lib/atoms"
 import * as fcl from "@onflow/fcl"
-import { ArrowCircleDownIcon, ArrowCircleLeftIcon, ArrowCircleRightIcon } from '@heroicons/react/outline'
+import { ArrowCircleDownIcon, ArrowCircleRightIcon } from '@heroicons/react/outline'
+import CollecitonCard from '../components/CollectionCard'
 
 const catalogFetcher = async (funcName) => {
   return await getNFTCatalog()
@@ -27,10 +21,6 @@ const linkStatusFetcher = async (funcName, account, catalog) => {
 // the same cadence code, so we just handle the first one
 const sortObject = o => Object.keys(o).sort().reduce((r, k) => (r[k] = o[k], r), {})
 
-const classNames = (...classes) => {
-  return classes.filter(Boolean).join(' ')
-}
-
 const filterCatalog = (catalog) => {
   let cleaned = {}
   let contractNames = {}
@@ -44,9 +34,7 @@ const filterCatalog = (catalog) => {
 }
 
 export default function Home(props) {
-  const [transactionInProgress, setTransactionInProgress] = useRecoilState(transactionInProgressState)
-  const [, setTransactionStatus] = useRecoilState(transactionStatusState)
-  const { mutate } = useSWRConfig()
+
 
   const user = props.user
   const account = user && user.loggedIn ? user.addr : null
@@ -107,33 +95,7 @@ export default function Home(props) {
                 {
                   linkStatus.bad.map((name) => {
                     const metadata = catalog[name]
-                    const imageURL = metadata.collectionDisplay.squareImage.file.url
-                    return (
-                      <div key={name} className="flex gap-x-3 items-center justify-between w-full px-4 py-4 rounded-3xl 
-            ring-1 ring-black ring-opacity-10 overflow-hidden bg-white">
-                        <div className='shrink truncate flex gap-x-2 items-center'>
-                          <div className="h-[40px] w-[40px] shrink-0 relative rounded-xl overflow-hidden bg-emerald">
-                            <Image src={`/api/imageproxy?url=${encodeURIComponent(imageURL)}`} alt="" layout="fill" objectFit="cover" />
-                          </div>
-                          <label className="shrink font-flow font-bold text-lg truncate">{name}</label>
-                        </div>
-
-                        <button
-                          className={
-                            classNames(
-                              transactionInProgress ? "bg-emerald-light text-gray-500" : "hover:bg-emerald-dark bg-emerald text-black",
-                              "shrink-0 truncate font-flow text-base shadow-sm font-bold w-[100px] rounded-full px-3 py-2 leading-5"
-                            )}
-                          disabled={transactionInProgress}
-                          onClick={async () => {
-                            await relink(metadata, setTransactionInProgress, setTransactionStatus)
-                            mutate(["linkStatusFetcher", account, catalog])
-                          }}
-                        >
-                          RELINK
-                        </button>
-                      </div>
-                    )
+                    return (<CollecitonCard key={name} name={name} metadata={metadata} type={"bad"} account={account} catalog={catalog} />)
                   })
                 }
               </div>
@@ -156,18 +118,7 @@ export default function Home(props) {
                 { showCorrectlyLinked ?
                   linkStatus.good.map((name) => {
                     const metadata = catalog[name]
-                    const imageURL = metadata.collectionDisplay.squareImage.file.url
-                    return (
-                      <div key={name} className="flex gap-x-3 items-center justify-between w-full px-4 py-4 rounded-3xl 
-            ring-1 ring-black ring-opacity-10 overflow-hidden bg-white">
-                        <div className='shrink truncate flex gap-x-2 items-center'>
-                          <div className="h-[40px] w-[40px] shrink-0 relative rounded-xl overflow-hidden bg-emerald">
-                            <Image src={`/api/imageproxy?url=${encodeURIComponent(imageURL)}`} alt="" layout="fill" objectFit="cover" />
-                          </div>
-                          <label className="shrink font-flow font-bold text-lg truncate">{name}</label>
-                        </div>
-                      </div>
-                    )
+                    return (<CollecitonCard key={name} name={name} metadata={metadata} type={"good"} account={account} catalog={catalog} />)
                   })
                 : null}
               </div>
@@ -179,45 +130,8 @@ export default function Home(props) {
                 {
                   linkStatus.unlinked.map((name) => {
                     const metadata = catalog[name]
-                    const imageURL = metadata.collectionDisplay.squareImage.file.url
-                    return (
-                      <div key={name} className="w-full flex gap-x-3 items-center justify-between px-4 py-4 rounded-3xl 
-            ring-1 ring-black ring-opacity-10 bg-white overflow-hidden">
-
-                        <div className='shrink truncate w-full flex gap-x-2 items-center'>
-                          <div className="h-[40px] w-[40px] shrink-0 relative rounded-xl overflow-hidden bg-emerald">
-                            <Image src={`/api/imageproxy?url=${encodeURIComponent(imageURL)}`} alt="" layout="fill" objectFit="cover" />
-                          </div>
-                          <label className="shrink font-flow font-bold text-lg truncate">{name}</label>
-                        </div>
-
-                        <button
-                          className="shrink-0 truncate font-flow text-base
-                        text-black shadow-sm font-bold w-[100px]
-                        hover:bg-emerald-dark
-                        bg-emerald rounded-full px-3 py-2 leading-5"
-                          onClick={async () => {
-                            await setupAccount(metadata, setTransactionInProgress, setTransactionStatus)
-                            mutate(["linkStatusFetcher", account, catalog])
-                          }}
-                        >
-                          SETUP
-                        </button>
-
-                        {/* TESTONLY */}
-                        {/* <button
-                          className="shrink-0 truncate font-flow text-base
-                        text-black shadow-sm font-bold w-[100px]
-                        hover:bg-emerald-dark
-                        bg-emerald rounded-full px-3 py-2 leading-5"
-                          onClick={async () => {
-                            await badlink(metadata, setTransactionInProgress, setTransactionStatus)
-                          }}
-                        >
-                          BADLINK
-                        </button> */}
-                      </div>
-                    )
+                    console.log(metadata)
+                    return (<CollecitonCard key={name} name={name} metadata={metadata} type={"unlinked"} account={account} catalog={catalog} />)
                   })
                 }
               </div>
