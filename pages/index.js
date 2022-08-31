@@ -12,6 +12,7 @@ import {
   transactionStatusState
 } from "../lib/atoms"
 import * as fcl from "@onflow/fcl"
+import { ArrowCircleDownIcon, ArrowCircleLeftIcon, ArrowCircleRightIcon } from '@heroicons/react/outline'
 
 const catalogFetcher = async (funcName) => {
   return await getNFTCatalog()
@@ -52,6 +53,7 @@ export default function Home(props) {
 
   const { data: catalogData, error: catalogError } = useSWR(["catalogFetcher"], catalogFetcher)
   const [catalog, setCatalog] = useState(null)
+  const [showCorrectlyLinked, setShowCorrectlyLinked] = useState(false)
   const [linkStatus, setLinkStatus] = useState(null)
 
   useEffect(() => {
@@ -109,8 +111,8 @@ export default function Home(props) {
                     return (
                       <div key={name} className="flex gap-x-3 items-center justify-between w-full px-4 py-4 rounded-3xl 
             ring-1 ring-black ring-opacity-10 overflow-hidden bg-white">
-                        <div className='shrink truncate flex gap-x-3 items-center'>
-                          <div className="h-[40px] w-[40px] relative rounded-xl overflow-hidden hidden sm:block bg-emerald">
+                        <div className='shrink truncate flex gap-x-2 items-center'>
+                          <div className="h-[40px] w-[40px] shrink-0 relative rounded-xl overflow-hidden bg-emerald">
                             <Image src={`/api/imageproxy?url=${encodeURIComponent(imageURL)}`} alt="" layout="fill" objectFit="cover" />
                           </div>
                           <label className="shrink font-flow font-bold text-lg truncate">{name}</label>
@@ -120,7 +122,7 @@ export default function Home(props) {
                           className={
                             classNames(
                               transactionInProgress ? "bg-emerald-light text-gray-500" : "hover:bg-emerald-dark bg-emerald text-black",
-                              "shrink truncate font-flow text-base shadow-sm font-bold w-[100px] rounded-full px-3 py-2 leading-5"
+                              "shrink-0 truncate font-flow text-base shadow-sm font-bold w-[100px] rounded-full px-3 py-2 leading-5"
                             )}
                           disabled={transactionInProgress}
                           onClick={async () => {
@@ -139,16 +141,27 @@ export default function Home(props) {
             }
             {linkStatus.good.length > 0 ?
               <div className="mb-8 flex flex-col gap-y-3 w-full">
-                <label className="block font-flow font-bold text-2xl">Correctly Linked</label>
-                {
+                <button 
+                  className="flex justify-between"
+                  onClick={() => {
+                    setShowCorrectlyLinked(!showCorrectlyLinked)
+                  }}
+                >
+                  <label className="block font-flow font-bold text-2xl">Correctly Linked</label>
+                  {!showCorrectlyLinked ?
+                  <ArrowCircleRightIcon className="text-emerald" width={32} height={32} /> :
+                  <ArrowCircleDownIcon className="text-emerald" width={32} height={32} />
+                  }
+                </button>
+                { showCorrectlyLinked ?
                   linkStatus.good.map((name) => {
                     const metadata = catalog[name]
                     const imageURL = metadata.collectionDisplay.squareImage.file.url
                     return (
                       <div key={name} className="flex gap-x-3 items-center justify-between w-full px-4 py-4 rounded-3xl 
             ring-1 ring-black ring-opacity-10 overflow-hidden bg-white">
-                        <div className='shrink truncate flex gap-x-3 items-center'>
-                          <div className="h-[40px] w-[40px] relative rounded-xl overflow-hidden hidden sm:block bg-emerald">
+                        <div className='shrink truncate flex gap-x-2 items-center'>
+                          <div className="h-[40px] w-[40px] shrink-0 relative rounded-xl overflow-hidden bg-emerald">
                             <Image src={`/api/imageproxy?url=${encodeURIComponent(imageURL)}`} alt="" layout="fill" objectFit="cover" />
                           </div>
                           <label className="shrink font-flow font-bold text-lg truncate">{name}</label>
@@ -156,7 +169,7 @@ export default function Home(props) {
                       </div>
                     )
                   })
-                }
+                : null}
               </div>
               : null
             }
@@ -171,8 +184,8 @@ export default function Home(props) {
                       <div key={name} className="w-full flex gap-x-3 items-center justify-between px-4 py-4 rounded-3xl 
             ring-1 ring-black ring-opacity-10 bg-white overflow-hidden">
 
-                        <div className='shrink truncate w-full flex gap-x-3 items-center'>
-                          <div className="h-[40px] w-[40px] relative rounded-xl overflow-hidden hidden sm:block bg-emerald">
+                        <div className='shrink truncate w-full flex gap-x-2 items-center'>
+                          <div className="h-[40px] w-[40px] shrink-0 relative rounded-xl overflow-hidden bg-emerald">
                             <Image src={`/api/imageproxy?url=${encodeURIComponent(imageURL)}`} alt="" layout="fill" objectFit="cover" />
                           </div>
                           <label className="shrink font-flow font-bold text-lg truncate">{name}</label>
