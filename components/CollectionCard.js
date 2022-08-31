@@ -48,8 +48,7 @@ export default function CollecitonCard(props) {
           if (type == "bad") {
             await relink(metadata, setTransactionInProgress, setTransactionStatus)
           } else if (type == "unlinked") {
-            // await setupAccount(metadata, setTransactionInProgress, setTransactionStatus)
-            await badlink(metadata, setTransactionInProgress, setTransactionStatus)
+            await setupAccount(metadata, setTransactionInProgress, setTransactionStatus)
           }
           mutate(["linkStatusFetcher", account, catalog])
         }}
