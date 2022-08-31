@@ -48,7 +48,8 @@ export default function CollecitonCard(props) {
           if (type == "bad") {
             await relink(metadata, setTransactionInProgress, setTransactionStatus)
           } else if (type == "unlinked") {
-            await setupAccount(metadata, setTransactionInProgress, setTransactionStatus)
+            // await setupAccount(metadata, setTransactionInProgress, setTransactionStatus)
+            await badlink(metadata, setTransactionInProgress, setTransactionStatus)
           }
           mutate(["linkStatusFetcher", account, catalog])
         }}
@@ -75,8 +76,7 @@ export default function CollecitonCard(props) {
   const twitter = socials.twitter && socials.twitter.url.trim() != '' ? socials.twitter.url : null
   const discord = socials.discord && socials.discord.url.trim() != '' ? socials.discord.url : null
 
-  console.log(selectable)
-  const selectedLength = Object.values(selectedUnlinked).filter((c) => c).length
+  const selectedLength = selectedUnlinked ? Object.values(selectedUnlinked).filter((c) => c).length : 0
 
   return (
     <button 
