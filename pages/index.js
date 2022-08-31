@@ -130,7 +130,6 @@ export default function Home(props) {
                 {
                   linkStatus.unlinked.map((name) => {
                     const metadata = catalog[name]
-                    console.log(metadata)
                     return (<CollecitonCard key={name} name={name} metadata={metadata} type={"unlinked"} account={account} catalog={catalog} />)
                   })
                 }

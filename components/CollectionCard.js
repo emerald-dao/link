@@ -1,6 +1,6 @@
 import Image from "next/image"
 import { useRecoilState } from "recoil"
-import { relink, setupAccount } from "../flow/transactions"
+import { badlink, relink, setupAccount } from "../flow/transactions"
 import {
   transactionInProgressState,
   transactionStatusState
