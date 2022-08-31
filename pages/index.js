@@ -1,12 +1,19 @@
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
-import useSWR from 'swr'
+import useSWR, {useSWRConfig} from 'swr'
 import { getLinkStatus, getNFTCatalog } from '../flow/scripts'
-import ErrorPage from './ErrorPage'
+import ErrorPage from './error'
 import { SpinnerCircular } from 'spinners-react'
 import * as fcl from "@onflow/fcl"
 import { ArrowCircleDownIcon, ArrowCircleRightIcon } from '@heroicons/react/outline'
 import CollecitonCard from '../components/CollectionCard'
+import { useRecoilState } from "recoil"
+import {
+  transactionInProgressState,
+  transactionStatusState
+} from "../lib/atoms"
+import { classNames } from '../lib/utils'
+import { relinkAll } from '../flow/transactions'
 
 const catalogFetcher = async (funcName) => {
   return await getNFTCatalog()
@@ -34,7 +41,10 @@ const filterCatalog = (catalog) => {
 }
 
 export default function Home(props) {
+  const [transactionInProgress, setTransactionInProgress] = useRecoilState(transactionInProgressState)
+  const [, setTransactionStatus] = useRecoilState(transactionStatusState)
 
+  const { mutate } = useSWRConfig()
 
   const user = props.user
   const account = user && user.loggedIn ? user.addr : null
@@ -91,7 +101,28 @@ export default function Home(props) {
           <div>
             {linkStatus.bad.length > 0 ?
               <div className="mb-8 flex flex-col gap-y-3 w-full">
-                <label className="font-flow font-bold text-2xl">Not Correctly Linked</label>
+                <div className="flex gap-x-3 justify-between">
+                  <label className="shrink truncate font-flow font-bold text-2xl">Not Correctly Linked</label>
+                  <button
+                    className={
+                      classNames(
+                        transactionInProgress ? "bg-emerald-light text-gray-500" : "hover:bg-emerald-dark bg-emerald text-black",
+                        "shrink-0 truncate font-flow text-base shadow-sm font-bold w-[120px] rounded-full px-3 py-2 leading-5"
+                      )}
+                    disabled={transactionInProgress}
+                    onClick={async () => {
+                      // RELINK ALL
+                      const metadataArr = linkStatus.bad.map((catalogName) => {
+                        return catalog[catalogName]
+                      })
+
+                      await relinkAll(metadataArr, setTransactionInProgress, setTransactionStatus)
+                      mutate(["linkStatusFetcher", account, catalog])
+                    }}
+                  >
+                    RELINK ALL
+                  </button>
+                </div>
                 {
                   linkStatus.bad.map((name) => {
                     const metadata = catalog[name]
@@ -103,7 +134,7 @@ export default function Home(props) {
             }
             {linkStatus.good.length > 0 ?
               <div className="mb-8 flex flex-col gap-y-3 w-full">
-                <button 
+                <button
                   className="flex justify-between"
                   onClick={() => {
                     setShowCorrectlyLinked(!showCorrectlyLinked)
@@ -111,16 +142,16 @@ export default function Home(props) {
                 >
                   <label className="block font-flow font-bold text-2xl">Correctly Linked</label>
                   {!showCorrectlyLinked ?
-                  <ArrowCircleRightIcon className="text-emerald" width={32} height={32} /> :
-                  <ArrowCircleDownIcon className="text-emerald" width={32} height={32} />
+                    <ArrowCircleRightIcon className="text-emerald" width={32} height={32} /> :
+                    <ArrowCircleDownIcon className="text-emerald" width={32} height={32} />
                   }
                 </button>
-                { showCorrectlyLinked ?
+                {showCorrectlyLinked ?
                   linkStatus.good.map((name) => {
                     const metadata = catalog[name]
                     return (<CollecitonCard key={name} name={name} metadata={metadata} type={"good"} account={account} catalog={catalog} />)
                   })
-                : null}
+                  : null}
               </div>
               : null
             }

@@ -6,12 +6,8 @@ import {
   transactionStatusState
 } from "../lib/atoms"
 import { useSWRConfig } from 'swr'
-import { isWhitelistedImage } from "../lib/utils"
-import { ExternalLinkIcon, GlobeAltIcon } from "@heroicons/react/outline"
-
-const classNames = (...classes) => {
-  return classes.filter(Boolean).join(' ')
-}
+import { classNames, isWhitelistedImage } from "../lib/utils"
+import { GlobeAltIcon } from "@heroicons/react/outline"
 
 export default function CollecitonCard(props) {
   const [transactionInProgress, setTransactionInProgress] = useRecoilState(transactionInProgressState)
