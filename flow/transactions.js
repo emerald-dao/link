@@ -22,6 +22,61 @@ export const TxStatus = {
   }
 }
 
+export const bulkSetupAccount = async (
+  metadataArr,
+  setTransactionInProgress,
+  setTransactionStatus
+) => {
+  const txFunc = async () => {
+    return await doBulkSetupAccount(metadataArr)
+  }
+
+  return await txHandler(txFunc, setTransactionInProgress, setTransactionStatus)
+}
+
+const doBulkSetupAccount = async (metadataArr) => {
+  const allContracts = {}
+  let code = `
+  transaction() {
+    prepare(signer: AuthAccount) {
+  `
+  for (let i = 0; i < metadataArr.length; i++) {
+    const metadata = metadataArr[i]
+    const contractName = metadata.contractName
+    const collectionData = metadata.collectionData
+    const { storagePath, publicPath, interfaces, collectionType, contracts } = parseCollectionData(collectionData)
+
+    const body = `
+    if signer.borrow<&NonFungibleToken.Collection>(from: ${storagePath}) == nil {
+      signer.save(<- ${contractName}.createEmptyCollection(), to: ${storagePath})
+      signer.link<&${collectionType}{${interfaces}}>(${publicPath}, target: ${storagePath})
+    }
+    `
+    code = code.concat(body)
+    for (const [name, address] of Object.entries(contracts)) {
+      allContracts[name] = address
+    }
+  }
+
+  let imports = ``
+  for (const [name, address] of Object.entries(allContracts)) {
+    imports = imports.concat(`import ${name} from 0x${address}\n`)
+  }
+
+  code = imports.concat(code).concat(`
+      }
+    }
+  `)
+
+  const transactionId = await fcl.mutate({
+    cadence: code,
+    proposer: fcl.currentUser,
+    payer: fcl.currentUser,
+    limit: 9999
+  })
+  return transactionId
+}
+
 export const setupAccount = async (
   metadata,
   setTransactionInProgress,
