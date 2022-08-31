@@ -56,6 +56,12 @@ export default function Home(props) {
   const [selectedUnlinked, setSelectedUnlinked] = useState({})
 
   useEffect(() => {
+    if (!account) {
+      setSelectedUnlinked({})
+    }
+  }, [account])
+
+  useEffect(() => {
     if (catalogData) {
       setCatalog(filterCatalog(catalogData))
     }
