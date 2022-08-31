@@ -1,17 +1,19 @@
 import Head from 'next/head'
-import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import useSWR, { useSWRConfig } from 'swr'
+import useSWR, {useSWRConfig} from 'swr'
 import { getLinkStatus, getNFTCatalog } from '../flow/scripts'
-import { badlink, link, relink } from '../flow/transactions'
-import ErrorPage from './ErrorPage'
-import { useRecoilState } from "recoil"
+import ErrorPage from './error'
 import { SpinnerCircular } from 'spinners-react'
+import * as fcl from "@onflow/fcl"
+import { ArrowCircleDownIcon, ArrowCircleRightIcon } from '@heroicons/react/outline'
+import CollecitonCard from '../components/CollectionCard'
+import { useRecoilState } from "recoil"
 import {
   transactionInProgressState,
   transactionStatusState
 } from "../lib/atoms"
-import * as fcl from "@onflow/fcl"
+import { classNames } from '../lib/utils'
+import { bulkSetupAccount, relinkAll } from '../flow/transactions'
 
 const catalogFetcher = async (funcName) => {
   return await getNFTCatalog()
@@ -25,10 +27,6 @@ const linkStatusFetcher = async (funcName, account, catalog) => {
 // contracts with duplicate contractName can't be imported in
 // the same cadence code, so we just handle the first one
 const sortObject = o => Object.keys(o).sort().reduce((r, k) => (r[k] = o[k], r), {})
-
-const classNames = (...classes) => {
-  return classes.filter(Boolean).join(' ')
-}
 
 const filterCatalog = (catalog) => {
   let cleaned = {}
@@ -45,6 +43,7 @@ const filterCatalog = (catalog) => {
 export default function Home(props) {
   const [transactionInProgress, setTransactionInProgress] = useRecoilState(transactionInProgressState)
   const [, setTransactionStatus] = useRecoilState(transactionStatusState)
+
   const { mutate } = useSWRConfig()
 
   const user = props.user
@@ -52,7 +51,15 @@ export default function Home(props) {
 
   const { data: catalogData, error: catalogError } = useSWR(["catalogFetcher"], catalogFetcher)
   const [catalog, setCatalog] = useState(null)
+  const [showCorrectlyLinked, setShowCorrectlyLinked] = useState(false)
   const [linkStatus, setLinkStatus] = useState(null)
+  const [selectedUnlinked, setSelectedUnlinked] = useState({})
+
+  useEffect(() => {
+    if (!account) {
+      setSelectedUnlinked({})
+    }
+  }, [account])
 
   useEffect(() => {
     if (catalogData) {
@@ -83,10 +90,16 @@ export default function Home(props) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       {!account ?
-        <div className="w-full h-[300px] flex items-center justify-center">
+        <div className="w-full h-[300px] mt-10 flex flex-col gap-y-8 items-center justify-center">
+          <label className="font-flow font-bold text-3xl sm:text-5xl">Explore <span className='text-emerald'>#onFlow</span></label>
+          <label className="-mt-4 font-flow font-bold text-3xl sm:text-5xl">with the Right 🔗<span className='text-emerald'>Link</span></label>
+          <div className="-mt-2 flex flex-col justify-center items-center">
+            <label className="font-flow text-base sm:text-lg">Make your experiences <span className='text-emerald'>#onFlow</span></label>
+            <label className="font-flow text-base sm:text-lg">smoother with the right link</label>
+          </div>
           <button
             type="button"
-            className="h-12 px-6 text-base rounded-2xl font-flow font-semibold shadow-sm text-black bg-emerald hover:bg-emerald-dark"
+            className="mt-3 h-12 px-6 text-base rounded-2xl font-flow font-semibold shadow-sm text-black bg-emerald hover:bg-emerald-dark"
             onClick={fcl.logIn}
           >
             <label>Connect Wallet</label>
@@ -99,37 +112,31 @@ export default function Home(props) {
           <div>
             {linkStatus.bad.length > 0 ?
               <div className="mb-8 flex flex-col gap-y-3 w-full">
-                <label className="font-flow font-bold text-2xl">Not Correctly Linked</label>
+                <div className="flex gap-x-3 justify-between items-center">
+                  <label className="shrink truncate font-flow font-bold text-2xl">Not Correctly Linked</label>
+                  <button
+                    className={
+                      classNames(
+                        transactionInProgress ? "bg-emerald-light text-gray-500" : "hover:bg-emerald-dark bg-emerald text-black",
+                        "shrink-0 truncate font-flow text-base shadow-sm font-bold w-[120px] rounded-full px-3 py-2 leading-5"
+                      )}
+                    disabled={transactionInProgress}
+                    onClick={async () => {
+                      const metadataArr = linkStatus.bad.map((catalogName) => {
+                        return catalog[catalogName]
+                      })
+
+                      await relinkAll(metadataArr, setTransactionInProgress, setTransactionStatus)
+                      mutate(["linkStatusFetcher", account, catalog])
+                    }}
+                  >
+                    RELINK ALL
+                  </button>
+                </div>
                 {
                   linkStatus.bad.map((name) => {
                     const metadata = catalog[name]
-                    const imageURL = metadata.collectionDisplay.squareImage.file.url
-                    return (
-                      <div key={name} className="flex gap-x-3 items-center justify-between w-full px-4 py-4 rounded-3xl 
-            ring-1 ring-black ring-opacity-10 overflow-hidden bg-white">
-                        <div className='shrink truncate flex gap-x-3 items-center'>
-                          <div className="h-[40px] w-[40px] relative rounded-xl overflow-hidden hidden sm:block bg-emerald">
-                            <Image src={`/api/imageproxy?url=${encodeURIComponent(imageURL)}`} alt="" layout="fill" objectFit="cover" />
-                          </div>
-                          <label className="shrink font-flow font-bold text-lg truncate">{name}</label>
-                        </div>
-
-                        <button
-                          className={
-                            classNames(
-                              transactionInProgress ? "bg-emerald-light text-gray-500" : "hover:bg-emerald-dark bg-emerald text-black",
-                              "shrink truncate font-flow text-base shadow-sm font-bold w-[100px] rounded-full px-3 py-2 leading-5"
-                            )}
-                          disabled={transactionInProgress}
-                          onClick={async () => {
-                            await relink(metadata, setTransactionInProgress, setTransactionStatus)
-                            mutate(["linkStatusFetcher", account, catalog])
-                          }}
-                        >
-                          RELINK
-                        </button>
-                      </div>
-                    )
+                    return (<CollecitonCard key={name} name={name} metadata={metadata} type={"bad"} account={account} catalog={catalog} />)
                   })
                 }
               </div>
@@ -137,59 +144,68 @@ export default function Home(props) {
             }
             {linkStatus.good.length > 0 ?
               <div className="mb-8 flex flex-col gap-y-3 w-full">
-                <label className="block font-flow font-bold text-2xl">Correctly Linked</label>
-                {
+                <button
+                  className="flex justify-between"
+                  onClick={() => {
+                    setShowCorrectlyLinked(!showCorrectlyLinked)
+                  }}
+                >
+                  <label className="block font-flow font-bold text-2xl">Correctly Linked</label>
+                  {!showCorrectlyLinked ?
+                    <ArrowCircleRightIcon className="text-emerald" width={32} height={32} /> :
+                    <ArrowCircleDownIcon className="text-emerald" width={32} height={32} />
+                  }
+                </button>
+                {showCorrectlyLinked ?
                   linkStatus.good.map((name) => {
                     const metadata = catalog[name]
-                    const imageURL = metadata.collectionDisplay.squareImage.file.url
-                    return (
-                      <div key={name} className="flex gap-x-3 items-center justify-between w-full px-4 py-4 rounded-3xl 
-            ring-1 ring-black ring-opacity-10 overflow-hidden bg-white">
-                        <div className='shrink truncate flex gap-x-3 items-center'>
-                          <div className="h-[40px] w-[40px] relative rounded-xl overflow-hidden hidden sm:block bg-emerald">
-                            <Image src={`/api/imageproxy?url=${encodeURIComponent(imageURL)}`} alt="" layout="fill" objectFit="cover" />
-                          </div>
-                          <label className="shrink font-flow font-bold text-lg truncate">{name}</label>
-                        </div>
-                      </div>
-                    )
+                    return (<CollecitonCard key={name} name={name} metadata={metadata} type={"good"} account={account} catalog={catalog} />)
                   })
-                }
+                  : null}
               </div>
               : null
             }
             {linkStatus.unlinked.length > 0 ?
               <div className="mb-8 flex flex-col gap-y-3 w-full">
-                <label className="block font-flow font-bold text-2xl">Not Linked Yet</label>
+                <div className="flex gap-x-3 justify-between items-center">
+                  <label className="shrink truncate font-flow font-bold text-2xl">Not Linked</label>
+                  <button
+                    className={
+                      classNames(
+                        transactionInProgress ? "bg-emerald-light text-gray-500" : "hover:bg-emerald-dark bg-emerald text-black",
+                        "shrink-0 truncate font-flow text-base shadow-sm font-bold w-[170px] rounded-full px-3 py-2 leading-5"
+                      )}
+                    disabled={transactionInProgress}
+                    onClick={async () => {
+                      const metadataArr = []
+                      for (const [name, selected] of Object.entries(selectedUnlinked)) {
+                        if (selected && linkStatus.unlinked.includes(name)) {
+                          metadataArr.push(catalog[name])
+                        }
+                      }
+
+                      await bulkSetupAccount(metadataArr, setTransactionInProgress, setTransactionStatus)
+                      setSelectedUnlinked({})
+                      mutate(["linkStatusFetcher", account, catalog])
+                    }}
+                  >
+                    {`BULK SETUP (${Object.values(selectedUnlinked).filter((c) => c).length})`}
+                  </button>
+                </div>
                 {
                   linkStatus.unlinked.map((name) => {
                     const metadata = catalog[name]
-                    const imageURL = metadata.collectionDisplay.squareImage.file.url
-                    return (
-                      <div key={name} className="w-full flex gap-x-3 items-center justify-between px-4 py-4 rounded-3xl 
-            ring-1 ring-black ring-opacity-10 bg-white overflow-hidden">
-
-                        <div className='shrink truncate w-full flex gap-x-3 items-center'>
-                          <div className="h-[40px] w-[40px] relative rounded-xl overflow-hidden hidden sm:block bg-emerald">
-                            <Image src={`/api/imageproxy?url=${encodeURIComponent(imageURL)}`} alt="" layout="fill" objectFit="cover" />
-                          </div>
-                          <label className="shrink font-flow font-bold text-lg truncate">{name}</label>
-                        </div>
-
-                        {/* TESTONLY */}
-                        {/* <button
-                          className="shrink-0 truncate font-flow text-base
-                        text-black shadow-sm font-bold w-[100px]
-                        hover:bg-emerald-dark
-                        bg-emerald rounded-full px-3 py-2 leading-5"
-                          onClick={async () => {
-                            await badlink(metadata, setTransactionInProgress, setTransactionStatus)
-                          }}
-                        >
-                          BADLINK
-                        </button> */}
-                      </div>
-                    )
+                    return (<CollecitonCard 
+                      key={name} 
+                      name={name} 
+                      metadata={metadata} 
+                      type={"unlinked"} 
+                      account={account} 
+                      catalog={catalog} 
+                      isSelectable={true} 
+                      selectedUnlinked={selectedUnlinked}
+                      setSelectedUnlinked={setSelectedUnlinked}
+                    />)
                   })
                 }
               </div>

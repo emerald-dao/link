@@ -35,18 +35,13 @@ export default function NavigationBar(props) {
   const AuthedState = () => {
     return (
       <div className="shrink truncate flex gap-x-2 items-center">
-        <button
+        <label
           className="shrink truncate font-flow text-base
           text-black shadow-sm
           bg-emerald rounded-full px-3 py-2 leading-5"
-          onClick={() => {
-            if (user) {
-              router.push(`/${user.addr}`)
-            }
-          }}
         >
           {user && user.addr}
-        </button>
+        </label>
         <button
           type="button"
           className="shrink-0 bg-emerald rounded-full p-2"
