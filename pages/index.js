@@ -14,6 +14,7 @@ import {
 } from "../lib/atoms"
 import { classNames } from '../lib/utils'
 import { bulkSetupAccount, relinkAll } from '../flow/transactions'
+import Link from 'next/link'
 
 const catalogFetcher = async (funcName) => {
   return await getNFTCatalog()
@@ -49,7 +50,7 @@ export default function Home(props) {
   const user = props.user
   const account = user && user.loggedIn ? user.addr : null
 
-  const { data: catalogData, error: catalogError } = useSWR(["catalogFetcher"], catalogFetcher)
+  const { data: catalogData, error: catalogError } = useSWR(account ? ["catalogFetcher"] : null, catalogFetcher)
   const [catalog, setCatalog] = useState(null)
   const [showCorrectlyLinked, setShowCorrectlyLinked] = useState(false)
   const [linkStatus, setLinkStatus] = useState(null)
@@ -96,6 +97,11 @@ export default function Home(props) {
           <div className="-mt-2 flex flex-col justify-center items-center">
             <label className="font-flow text-base sm:text-lg">Make your experiences <span className='text-emerald'>#onFlow</span></label>
             <label className="font-flow text-base sm:text-lg">smoother with the right link</label>
+            <Link href="/about">
+              <label className="text-emerald font-bold cursor-pointer">
+              👉Click to know more👈
+              </label>
+            </Link>
           </div>
           <button
             type="button"
