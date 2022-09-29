@@ -178,10 +178,10 @@ export default function Home(props) {
                   <button
                     className={
                       classNames(
-                        transactionInProgress ? "bg-emerald-light text-gray-500" : "hover:bg-emerald-dark bg-emerald text-black",
+                        (transactionInProgress || Object.values(selectedUnlinked).filter((c) => c).length == 0) ? "bg-emerald-light text-gray-500" : "hover:bg-emerald-dark bg-emerald text-black",
                         "shrink-0 truncate font-flow text-base shadow-sm font-bold w-[170px] rounded-full px-3 py-2 leading-5"
                       )}
-                    disabled={transactionInProgress}
+                    disabled={transactionInProgress || Object.values(selectedUnlinked).filter((c) => c).length == 0}
                     onClick={async () => {
                       const metadataArr = []
                       for (const [name, selected] of Object.entries(selectedUnlinked)) {
