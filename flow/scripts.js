@@ -21,14 +21,57 @@ export const getNFTCatalog = async () => {
 }
 
 export const getLinkStatus = async(account, catalog) => {
-  const code = genlinkCheckerScript(catalog)
-  const status = await fcl.query({
-    cadence: code,
-    args: (arg, t) => [
-      arg(account, t.Address),
-    ]
-  }) 
-  return status
+  const catalogs = splitCatalog(catalog)
+  const promises = catalogs.map((c) => {
+    const code = genlinkCheckerScript(c)
+    return fcl.query({
+      cadence: code,
+      args: (arg, t) => [
+        arg(account, t.Address),
+      ]
+    }) 
+  })
+
+  const statuses = await Promise.all(promises)
+  const result = statuses.reduce((acc, current) => {
+    if (acc.good) {
+      acc.good = acc.good.concat(current.good)
+    } else {
+      acc.good = current.good
+    }
+
+    if (acc.bad) {
+      acc.bad = acc.bad.concat(current.bad)
+    } else {
+      acc.bad = current.bad
+    }
+
+    if (acc.unlinked) {
+      acc.unlinked = acc.unlinked.concat(current.unlinked)
+    } else {
+      acc.unlinked = current.unlinked
+    }
+    return acc
+  }, {})
+
+  return result
+}
+
+const splitCatalog = (catalog) => {
+  const catalogs = []
+  let currentCatalog = {}
+  for (const [catalogName, metadata] of Object.entries(catalog)) { 
+    if (Object.keys(currentCatalog).length >= 60) {
+      const c = Object.assign({}, currentCatalog)
+      catalogs.push(c)
+      currentCatalog = {}
+    }
+
+    currentCatalog[catalogName] = metadata
+  }
+  const c = Object.assign({}, currentCatalog) 
+  catalogs.push(c)
+  return catalogs
 }
 
 const genlinkCheckerScript = (catalog) => {
