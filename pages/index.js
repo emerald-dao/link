@@ -91,7 +91,7 @@ export default function Home(props) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       {!account ?
-        <div className="w-full h-[300px] mt-10 flex flex-col gap-y-8 items-center justify-center">
+        <div className="w-full mt-10 flex flex-col gap-y-8 items-center justify-center">
           <label className="font-flow font-bold text-3xl sm:text-5xl">Explore <span className='text-emerald'>#onFlow</span></label>
           <label className="-mt-4 font-flow font-bold text-3xl sm:text-5xl">with the Right 🔗<span className='text-emerald'>Link</span></label>
           <div className="-mt-2 flex flex-col justify-center items-center">
