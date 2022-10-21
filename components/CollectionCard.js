@@ -8,9 +8,9 @@ import {
   basicNotificationContentState
 } from "../lib/atoms"
 import { useSWRConfig } from 'swr'
-import { classNames, isWhitelistedImage } from "../lib/utils"
+import { classNames, getIPFSFileURL, ipfs, isWhitelistedImage } from "../lib/utils"
 import { GlobeAltIcon } from "@heroicons/react/outline"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 const MAX_BULK_SIZE = 20
 
@@ -24,7 +24,30 @@ export default function CollecitonCard(props) {
   const { name, metadata, type, account, catalog, isSelectable, selectedUnlinked, setSelectedUnlinked } = props
   const [selected, setSelected] = useState(false)
   const selectable = isSelectable == true
-  const imageURL = metadata.collectionDisplay.squareImage.file.url
+
+  const [imageSrc, setImageSrc] = useState(null)
+
+  useEffect(() => {
+    let src = null
+    let squareImageFile = metadata.collectionDisplay.squareImage.file
+    if (squareImageFile.url && squareImageFile.url.trim() != '') {
+      const imageURL = squareImageFile.url.trim()
+      src = `/api/imageproxy?url=${encodeURIComponent(imageURL)}`
+      if (isWhitelistedImage(imageURL)) {
+        src = imageURL
+      } else {
+        console.log(imageURL)
+      }
+      setImageSrc(src)
+    } else if (squareImageFile.cid
+      && squareImageFile.cid.trim() != ''
+      && squareImageFile.path
+      && squareImageFile.path.trim() != '') {
+      const imageCID = squareImageFile.cid.trim()
+      const imagePath = squareImageFile.path.trim()
+      setImageSrc(getIPFSFileURL(imageCID, imagePath))
+    }
+  }, [metadata])
 
   const getButton = (type, metadata, account, catalog) => {
     if (type == "good") {
@@ -55,13 +78,6 @@ export default function CollecitonCard(props) {
         {title}
       </button>
     )
-  }
-
-  let src = `/api/imageproxy?url=${encodeURIComponent(imageURL)}`
-  if (imageURL.trim() == '') {
-    src = null
-  } else if (isWhitelistedImage(imageURL)) {
-    src = imageURL
   }
 
   const externalURL = metadata.collectionDisplay.externalURL
@@ -103,7 +119,7 @@ export default function CollecitonCard(props) {
       >
         <div className='shrink truncate flex gap-x-2 items-center'>
           <div className="h-[48px] w-[48px] shrink-0 relative rounded-xl overflow-hidden border-emerald border">
-            {src ? <Image src={src} alt="" layout="fill" objectFit="contain" /> : null}
+            {imageSrc ? <Image src={imageSrc} alt="" layout="fill" objectFit="contain" /> : null}
           </div>
 
           <div className="flex flex-col gap-y-1 shrink truncate">
