@@ -61,7 +61,7 @@ const splitCatalog = (catalog) => {
   const catalogs = []
   let currentCatalog = {}
   for (const [catalogName, metadata] of Object.entries(catalog)) { 
-    if (Object.keys(currentCatalog).length >= 60) {
+    if (Object.keys(currentCatalog).length >= 40) {
       const c = Object.assign({}, currentCatalog)
       catalogs.push(c)
       currentCatalog = {}
