@@ -81,7 +81,8 @@ export default function Home(props) {
           </div> : null
       }
       {
-        account && showNftBoard ?
+        account ? (
+         showNftBoard ?
           <div className='flex flex-col gap-y-10'>
             <label className='px-10'>The collections listed here are fetched from
               <a
@@ -108,6 +109,7 @@ export default function Home(props) {
               . If you want your project to be listed, please submit a proposal to it</label>
             <FtLinkBoard account={account} />
           </div>
+        ) : null
       }
     </div>
   )
