@@ -82,8 +82,32 @@ export default function Home(props) {
       }
       {
         account && showNftBoard ?
-          <NftLinkBoard account={account} /> :
-          <FtLinkBoard account={account} />
+          <div className='flex flex-col gap-y-10'>
+            <label className='px-10'>The collections listed here are fetched from
+              <a
+                href="https://www.flow-nft-catalog.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-flow text-sm whitespace-pre"
+              >
+                &nbsp;<span className="underline font-bold decoration-emerald decoration-2">NFTCatalog</span>
+              </a>
+              . If you want your project to be listed, please submit a proposal to it</label>
+            <NftLinkBoard account={account} />
+          </div> :
+          <div className='flex flex-col gap-y-10'>
+            <label className='px-10'>The tokens listed here are fetched from
+              <a
+                href="https://github.com/FlowFans/flow-token-list"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-flow text-sm whitespace-pre"
+              >
+                &nbsp;<span className="underline font-bold decoration-emerald decoration-2">FlowTokenList</span>
+              </a>
+              . If you want your project to be listed, please submit a proposal to it</label>
+            <FtLinkBoard account={account} />
+          </div>
       }
     </div>
   )
