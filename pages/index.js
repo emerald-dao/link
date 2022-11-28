@@ -5,6 +5,7 @@ import Link from 'next/link'
 import NftLinkBoard from '../components/NftLinkBoard'
 import { useState } from 'react'
 import { classNames } from '../lib/utils'
+import FtLinkBoard from '../components/FtLinkBoard'
 
 export default function Home(props) {
   const user = props.user
@@ -81,7 +82,8 @@ export default function Home(props) {
       }
       {
         account && showNftBoard ?
-          <NftLinkBoard account={account} /> : null
+          <NftLinkBoard account={account} /> :
+          <FtLinkBoard account={account} />
       }
     </div>
   )

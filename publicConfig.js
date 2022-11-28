@@ -16,13 +16,17 @@ if (!flowscanURL) throw "Missing NEXT_PUBLIC_FLOWSCAN_URL"
 const nftCatalogAddress = process.env.NEXT_PUBLIC_NFTCATALOG_ADDRESS
 if (!nftCatalogAddress) throw "Missing NEXT_PUBLIC_NFTCATALOG_ADDRESS"
 
+const fungibleTokenAddress = process.env.NEXT_PUBLIC_FUNGIBLE_TOKEN_ADDRESS
+if (!fungibleTokenAddress) throw "Missing NEXT_PUBLIC_FUNGIBLE_TOKEN_ADDRESS"
+
 const publicConfig = {
   chainEnv,
   accessNodeAPI,
   appURL,
   walletDiscovery,
   flowscanURL,
-  nftCatalogAddress
+  nftCatalogAddress,
+  fungibleTokenAddress
 }
 
 export default publicConfig

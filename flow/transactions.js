@@ -300,8 +300,10 @@ const doDangerousLink = async (metadata) => {
   const body = `
   transaction() {
     prepare(signer: AuthAccount) {
-      signer.unlink(${publicPath})
-      signer.link<&${collectionType}{NonFungibleToken.CollectionPublic, NonFungibleToken.Provider}>(${publicPath}, target: ${storagePath})
+      if signer.borrow<&NonFungibleToken.Collection>(from: ${storagePath}) == nil {
+        signer.save(<- ${contractName}.createEmptyCollection(), to: ${storagePath})
+        signer.link<&${collectionType}{NonFungibleToken.CollectionPublic, NonFungibleToken.Provider}>(${publicPath}, target: ${storagePath})
+      }
     }
   }
   `

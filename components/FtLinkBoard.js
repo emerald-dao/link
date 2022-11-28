@@ -1,51 +1,44 @@
 import { SpinnerCircular } from 'spinners-react'
 import { ArrowCircleDownIcon, ArrowCircleRightIcon } from '@heroicons/react/outline'
-import CollectionCard from '../components/CollectionCard'
-import { classNames } from '../lib/utils'
-import { bulkSetupAccount, relinkAll } from '../flow/transactions'
+import useSWR, { useSWRConfig } from "swr";
+import publicConfig from "../publicConfig";
 import { useRecoilState } from "recoil"
+import { TokenListProvider, ENV, Strategy } from 'flow-native-token-registry'
 import {
   transactionInProgressState,
   transactionStatusState
 } from "../lib/atoms"
-import useSWR, { useSWRConfig } from 'swr'
-import { useEffect, useState } from 'react'
-import { bulkGetNftCatalog, getLinkStatus } from '../flow/scripts'
-import ErrorPage from './ErrorPage'
+import { useEffect, useState } from "react";
+import { getFtLinkStatus } from "../flow/scripts";
+import ErrorPage from "./ErrorPage";
+import { classNames } from "../lib/utils";
+import TokenCard from "./TokenCard";
+import { ftBulkSetupAccount, ftRelinkAll } from '../flow/ft-transactions';
 
-const catalogFetcher = async (funcName) => {
-  return await bulkGetNftCatalog()
-}
-
-const linkStatusFetcher = async (funcName, account, catalog) => {
-  return await getLinkStatus(account, catalog)
-}
-
-// There are some records with duplicate contractName
-// contracts with duplicate contractName can't be imported in
-// the same cadence code, so we just handle the first one
-const sortObject = o => Object.keys(o).sort().reduce((r, k) => (r[k] = o[k], r), {})
-
-const filterCatalog = (catalog) => {
-  let cleaned = {}
-  let contractNames = {}
-  for (const [catalogName, metadata] of Object.entries(catalog)) {
-    if (!contractNames[metadata.contractName]) {
-      contractNames[metadata.contractName] = true
-      cleaned[catalogName] = metadata
-    }
+const registryFetcher = async (funcName) => {
+  let env = ENV.Mainnet
+  if (publicConfig.chainEnv == 'testnet') {
+    env = ENV.Testnet
   }
-  return sortObject(cleaned)
+
+  const tokens = await new TokenListProvider().resolve(Strategy.GitHub, env)
+  return tokens.getList().map((token) => {
+    token.id = `${token.address.replace("0x", "A.")}.${token.contractName}`
+    return token
+  })
 }
 
-export default function NftLinkBoard(props) {
+const ftLinkStatusFetcher = async (funcName, account, registry) => {
+  return await getFtLinkStatus(account, registry)
+}
+
+export default function FtLinkBoard(props) {
   const { mutate } = useSWRConfig()
-  const { account } = props
   const [transactionInProgress, setTransactionInProgress] = useRecoilState(transactionInProgressState)
   const [, setTransactionStatus] = useRecoilState(transactionStatusState)
+  const { account } = props
 
-  const { data: catalogData, error: catalogError } = useSWR(account ? ["catalogFetcher"] : null, catalogFetcher)
-  const [catalog, setCatalog] = useState(null)
+  const [registry, setRegistry] = useState(null)
   const [linkStatus, setLinkStatus] = useState(null)
 
   const [showCorrectlyLinked, setShowCorrectlyLinked] = useState(false)
@@ -57,21 +50,23 @@ export default function NftLinkBoard(props) {
     }
   }, [account])
 
+  const { data: registryData, error: registryError } = useSWR(account ? ["registryFetcher"] : null, registryFetcher)
+
   useEffect(() => {
-    if (catalogData) {
-      setCatalog(filterCatalog(catalogData))
+    if (registryData) {
+      setRegistry(registryData)
     }
-  }, [catalogData])
+  }, [registryData])
 
   const { data: statusData, error: statusError } = useSWR(
-    (catalog && account) ? ["linkStatusFetcher", account, catalog] : null, linkStatusFetcher)
+    (registryData && account) ? ["ftLinkStatusFetcher", account, registryData] : null, ftLinkStatusFetcher)
 
   useEffect(() => {
     if (statusData) { setLinkStatus(statusData) }
   }, [statusData])
 
-  if (catalogError) {
-    return <ErrorPage code={catalogError.statusCode} title={"Get NFTCatalog Failed"} detail={"Please check you network status and try again"} />
+  if (registryError) {
+    return <ErrorPage code={registryError.statusCode} title={"Get Token List Failed"} detail={"Please check you network status and try again"} />
   }
 
   if (statusError) {
@@ -88,7 +83,7 @@ export default function NftLinkBoard(props) {
                 <div className="flex gap-x-3 justify-between items-center">
                   <div className="shrink truncate flex flex-col gap-y-1">
                     <label className="shrink truncate font-flow font-bold text-xl sm:text-2xl">Dangerously Linked</label>
-                    <label className="shrink truncate font-flow text-base">{`Provider is exposed to public, so everyone can withdraw your NFTs`}</label>
+                    <label className="shrink truncate font-flow text-base">{`Provider is exposed to public, so everyone can withdraw your funds`}</label>
                   </div>
                   <button
                     className={
@@ -98,21 +93,20 @@ export default function NftLinkBoard(props) {
                       )}
                     disabled={transactionInProgress}
                     onClick={async () => {
-                      const metadataArr = linkStatus.dangerous.map((catalogName) => {
-                        return catalog[catalogName]
+                      const tokens = registry.filter((token) => {
+                        return linkStatus.dangerous.includes(token.id)
                       })
-
-                      await relinkAll(metadataArr, setTransactionInProgress, setTransactionStatus)
-                      mutate(["linkStatusFetcher", account, catalog])
+                      await ftRelinkAll(tokens, setTransactionInProgress, setTransactionStatus)
+                      mutate(["ftLinkStatusFetcher", account, registry])
                     }}
                   >
                     RELINK ALL
                   </button>
                 </div>
                 {
-                  linkStatus.dangerous.map((name) => {
-                    const metadata = catalog[name]
-                    return (<CollectionCard key={`dangerous_${name}`} name={name} metadata={metadata} type={"dangerous"} account={account} catalog={catalog} />)
+                  linkStatus.dangerous.map((tokenID) => {
+                    const token = registry.find((t) => t.id == tokenID)
+                    return (<TokenCard key={`dangerous_${tokenID}`} token={token} type={"dangerous"} account={account} registry={registry} />)
                   })
                 }
               </div>
@@ -123,7 +117,7 @@ export default function NftLinkBoard(props) {
                 <div className="flex gap-x-3 justify-between items-center">
                   <div className="shrink truncate flex flex-col gap-y-1">
                     <label className="shrink truncate font-flow font-bold text-xl sm:text-2xl">Not Correctly Linked</label>
-                    <label className="shrink truncate font-flow text-base">{`Your link does not conform to NFTCatalog`}</label>
+                    <label className="shrink truncate font-flow text-base">{`You aren't able to receive funds or others aren't able to query your balance`}</label>
                   </div>
                   <button
                     className={
@@ -133,21 +127,21 @@ export default function NftLinkBoard(props) {
                       )}
                     disabled={transactionInProgress}
                     onClick={async () => {
-                      const metadataArr = linkStatus.bad.map((catalogName) => {
-                        return catalog[catalogName]
+                      const tokens = registry.filter((token) => {
+                        return linkStatus.bad.includes(token.id)
                       })
 
-                      await relinkAll(metadataArr, setTransactionInProgress, setTransactionStatus)
-                      mutate(["linkStatusFetcher", account, catalog])
+                      await ftRelinkAll(tokens, setTransactionInProgress, setTransactionStatus)
+                      mutate(["ftLinkStatusFetcher", account, registry])
                     }}
                   >
                     RELINK ALL
                   </button>
                 </div>
                 {
-                  linkStatus.bad.map((name) => {
-                    const metadata = catalog[name]
-                    return (<CollectionCard key={name} name={name} metadata={metadata} type={"bad"} account={account} catalog={catalog} />)
+                  linkStatus.bad.map((tokenID) => {
+                    const token = registry.find((t) => t.id == tokenID)
+                    return (<TokenCard key={tokenID} token={token} type={"bad"} account={account} registry={registry} />)
                   })
                 }
               </div>
@@ -168,9 +162,9 @@ export default function NftLinkBoard(props) {
                   }
                 </button>
                 {showCorrectlyLinked ?
-                  linkStatus.good.map((name) => {
-                    const metadata = catalog[name]
-                    return (<CollectionCard key={name} name={name} metadata={metadata} type={"good"} account={account} catalog={catalog} />)
+                  linkStatus.good.map((tokenID) => {
+                    const token = registry.find((t) => t.id == tokenID)
+                    return (<TokenCard key={tokenID} token={token} type={"good"} account={account} registry={registry} />)
                   })
                   : null}
               </div>
@@ -188,30 +182,29 @@ export default function NftLinkBoard(props) {
                       )}
                     disabled={transactionInProgress || Object.values(selectedUnlinked).filter((c) => c).length == 0}
                     onClick={async () => {
-                      const metadataArr = []
-                      for (const [name, selected] of Object.entries(selectedUnlinked)) {
-                        if (selected && linkStatus.unlinked.includes(name)) {
-                          metadataArr.push(catalog[name])
+                      const tokens = []
+                      for (const [tokenID, selected] of Object.entries(selectedUnlinked)) {
+                        if (selected && linkStatus.unlinked.includes(tokenID)) {
+                          tokens.push(registry.find((t) => t.id == tokenID))
                         }
                       }
 
-                      await bulkSetupAccount(metadataArr, setTransactionInProgress, setTransactionStatus)
-                      mutate(["linkStatusFetcher", account, catalog])
+                      await ftBulkSetupAccount(tokens, setTransactionInProgress, setTransactionStatus)
+                      mutate(["ftLinkStatusFetcher", account, registry])
                     }}
                   >
                     {`BULK SETUP (${Object.values(selectedUnlinked).filter((c) => c).length})`}
                   </button>
                 </div>
                 {
-                  linkStatus.unlinked.map((name) => {
-                    const metadata = catalog[name]
-                    return (<CollectionCard
-                      key={name}
-                      name={name}
-                      metadata={metadata}
+                  linkStatus.unlinked.map((tokenID) => {
+                    const token = registry.find((t) => t.id == tokenID)
+                    return (<TokenCard
+                      key={tokenID}
+                      token={token}
                       type={"unlinked"}
                       account={account}
-                      catalog={catalog}
+                      registry={registry}
                       isSelectable={true}
                       selectedUnlinked={selectedUnlinked}
                       setSelectedUnlinked={setSelectedUnlinked}
@@ -230,5 +223,4 @@ export default function NftLinkBoard(props) {
       }
     </>
   )
-
 }
