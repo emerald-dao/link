@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
 import useSWR, {useSWRConfig} from 'swr'
-import { getLinkStatus, getNFTCatalog } from '../flow/scripts'
+import { bulkGetNftCatalog, getLinkStatus, getNFTCatalog } from '../flow/scripts'
 import ErrorPage from './error'
 import { SpinnerCircular } from 'spinners-react'
 import * as fcl from "@onflow/fcl"
@@ -17,7 +17,7 @@ import { bulkSetupAccount, relinkAll } from '../flow/transactions'
 import Link from 'next/link'
 
 const catalogFetcher = async (funcName) => {
-  return await getNFTCatalog()
+  return await bulkGetNftCatalog()
 }
 
 const linkStatusFetcher = async (funcName, account, catalog) => {
@@ -76,6 +76,7 @@ export default function Home(props) {
   }, [statusData])
 
   if (catalogError) {
+    console.log(catalogError)
     return <ErrorPage code={catalogError.statusCode} title={"Get NFTCatalog Failed"} detail={"Please check you network status and try again"} />
   }
 

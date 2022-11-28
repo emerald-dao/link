@@ -3,23 +3,6 @@ import * as fcl from "@onflow/fcl"
 
 const NFTCatalogPath = "0xNFTCatalog"
 
-export const getNFTCatalog = async () => {
-  const code = `
-  import NFTCatalog from 0xNFTCatalog
-
-  pub fun main(): {String : NFTCatalog.NFTCatalogMetadata} {
-      return NFTCatalog.getCatalog()
-  }
-  `
-  .replace(NFTCatalogPath, publicConfig.nftCatalogAddress)
-
-  const catalog = await fcl.query({
-    cadence: code
-  }) 
-
-  return catalog
-}
-
 export const getLinkStatus = async(account, catalog) => {
   const catalogs = splitCatalog(catalog)
   const promises = catalogs.map((c) => {
@@ -141,4 +124,96 @@ const genlinkCheckerScript = (catalog) => {
   }
   code = imports.concat(code)
   return code
+}
+
+// --- Utils ---
+
+const splitList = (list, chunkSize) => {
+  const groups = []
+  let currentGroup = []
+  for (let i = 0; i < list.length; i++) {
+      const collectionID = list[i]
+      if (currentGroup.length >= chunkSize) {
+        groups.push([...currentGroup])
+        currentGroup = []
+      }
+      currentGroup.push(collectionID)
+  }
+  groups.push([...currentGroup])
+  return groups
+}
+
+// --- NFT Catalog ---
+
+export const bulkGetNftCatalog = async () => {
+  const collectionIdentifiers = await getCollectionIdentifiers()
+  const groups = splitList(collectionIdentifiers, 50)
+  const promises = groups.map((group) => {
+    return getNftCatalogByCollectionIDs(group)
+  })
+
+  const itemGroups = await Promise.all(promises)
+  const items = itemGroups.reduce((acc, current) => {
+    return Object.assign(acc, current)
+  }, {}) 
+  return items 
+}
+
+export const getNftCatalogByCollectionIDs = async (collectionIDs) => {
+  const code = `
+  import NFTCatalog from 0xNFTCatalog
+
+  pub fun main(collectionIdentifiers: [String]): {String: NFTCatalog.NFTCatalogMetadata} {
+    let res: {String: NFTCatalog.NFTCatalogMetadata} = {}
+    for collectionID in collectionIdentifiers {
+        if let catalog = NFTCatalog.getCatalogEntry(collectionIdentifier: collectionID) {
+          res[collectionID] = catalog
+        }
+    }
+    return res
+  }
+  `
+  .replace(NFTCatalogPath, publicConfig.nftCatalogAddress)
+
+  const catalogs = await fcl.query({
+    cadence: code,
+    args: (arg, t) => [
+      arg(collectionIDs, t.Array(t.String))
+    ]
+  }) 
+
+  return catalogs  
+}
+
+const getCollectionIdentifiers = async () => {
+  const typeData = await getCatalogTypeData()
+
+  const collectionData = Object.values(typeData)
+  const collectionIdentifiers = []
+  for (let i = 0; i < collectionData.length; i++) {
+    const data = collectionData[i]
+    let collectionIDs = Object.keys(Object.assign({}, data))
+    if (collectionIDs.length > 0) {
+      collectionIdentifiers.push(collectionIDs[0])
+    }
+  }
+  return collectionIdentifiers
+}
+
+const getCatalogTypeData = async () => {
+  const code = `
+  import NFTCatalog from 0xNFTCatalog
+
+  pub fun main(): {String : {String : Bool}} {
+    let catalog = NFTCatalog.getCatalogTypeData()
+    return catalog
+  }
+  `
+  .replace(NFTCatalogPath, publicConfig.nftCatalogAddress)
+
+  const typeData = await fcl.query({
+    cadence: code
+  }) 
+
+  return typeData 
 }

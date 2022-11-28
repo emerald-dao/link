@@ -8,7 +8,7 @@ import {
   basicNotificationContentState
 } from "../lib/atoms"
 import { useSWRConfig } from 'swr'
-import { classNames, getIPFSFileURL, ipfs, isWhitelistedImage } from "../lib/utils"
+import { classNames, getImageSrcFromMetadataViewsFile, getIPFSFileURL, ipfs, isWhitelistedImage } from "../lib/utils"
 import { GlobeAltIcon } from "@heroicons/react/outline"
 import { useEffect, useState } from "react"
 
@@ -28,25 +28,8 @@ export default function CollecitonCard(props) {
   const [imageSrc, setImageSrc] = useState(null)
 
   useEffect(() => {
-    let src = null
     let squareImageFile = metadata.collectionDisplay.squareImage.file
-    if (squareImageFile.url && squareImageFile.url.trim() != '') {
-      const imageURL = squareImageFile.url.trim()
-      src = `/api/imageproxy?url=${encodeURIComponent(imageURL)}`
-      if (isWhitelistedImage(imageURL)) {
-        src = imageURL
-      } else {
-        console.log(imageURL)
-      }
-      setImageSrc(src)
-    } else if (squareImageFile.cid
-      && squareImageFile.cid.trim() != ''
-      && squareImageFile.path
-      && squareImageFile.path.trim() != '') {
-      const imageCID = squareImageFile.cid.trim()
-      const imagePath = squareImageFile.path.trim()
-      setImageSrc(getIPFSFileURL(imageCID, imagePath))
-    }
+    setImageSrc(getImageSrcFromMetadataViewsFile(squareImageFile))
   }, [metadata])
 
   const getButton = (type, metadata, account, catalog) => {
@@ -119,7 +102,7 @@ export default function CollecitonCard(props) {
       >
         <div className='shrink truncate flex gap-x-2 items-center'>
           <div className="h-[48px] w-[48px] shrink-0 relative rounded-xl overflow-hidden border-emerald border">
-            {imageSrc ? <Image src={imageSrc} alt="" layout="fill" objectFit="contain" /> : null}
+            {imageSrc ? <Image src={imageSrc} placeholder="blur" blurDataURL="/link.png" alt="/link.png" fill sizes="10vw" className="object-contain" /> : null}
           </div>
 
           <div className="flex flex-col gap-y-1 shrink truncate">
@@ -142,7 +125,7 @@ export default function CollecitonCard(props) {
                   onClick={(event) => event.stopPropagation()}
                 >
                   <div className="h-[16px] w-[16px] shrink-0 relative">
-                    <Image src={"/twitter.png"} alt="" layout="fill" objectFit="contain" />
+                    <Image src={"/twitter.png"} alt="" fill sizes="10vw" className="object-contain" />
                   </div>
                 </a> : null}
               {discord ?
@@ -153,7 +136,7 @@ export default function CollecitonCard(props) {
                   onClick={(event) => event.stopPropagation()}
                 >
                   <div className="h-[16px] w-[16px] shrink-0 relative">
-                    <Image src={"/discord.png"} alt="" layout="fill" objectFit="contain" />
+                    <Image src={"/discord.png"} alt="" fill sizes="10vw" className="object-contain" />
                   </div>
                 </a> : null}
             </div>
