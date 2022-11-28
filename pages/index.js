@@ -3,10 +3,14 @@ import * as fcl from "@onflow/fcl"
 
 import Link from 'next/link'
 import NftLinkBoard from '../components/NftLinkBoard'
+import { useState } from 'react'
+import { classNames } from '../lib/utils'
 
 export default function Home(props) {
   const user = props.user
   const account = user && user.loggedIn ? user.addr : null
+
+  const [showNftBoard, setShowNftBoard] = useState(true)
 
   return (
     <div className="container mx-auto max-w-[920px] min-w-[380px] px-6">
@@ -38,7 +42,47 @@ export default function Home(props) {
         </div>
         : null
       }
-      <NftLinkBoard account={account} />
+      {
+        account ?
+          <div className="w-full flex justify-center mb-8">
+            <div className="flex gap-x-1 bg-emerald-light w-80 h-10
+        rounded-lg justify-center p-1
+        ">
+              <button
+                className={classNames(
+                  showNftBoard ? "bg-emerald text-black" : "bg-emerald-light text-gray-500",
+                  `basis-1/2 rounded-md font-flow font-semibold`
+                )
+                }
+                onClick={() => {
+                  if (!showNftBoard) {
+                    setShowNftBoard(true)
+                  }
+                }}
+              >
+                NFT
+              </button>
+              <button
+                className={classNames(
+                  !showNftBoard ? "bg-emerald text-black" : "bg-emerald-light text-gray-500",
+                  `basis-1/2 rounded-md font-flow font-semibold`
+                )
+                }
+                onClick={() => {
+                  if (showNftBoard) {
+                    setShowNftBoard(false)
+                  }
+                }}
+              >
+                FT
+              </button>
+            </div>
+          </div> : null
+      }
+      {
+        account && showNftBoard ?
+          <NftLinkBoard account={account} /> : null
+      }
     </div>
   )
 }

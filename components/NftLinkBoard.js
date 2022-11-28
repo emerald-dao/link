@@ -87,7 +87,7 @@ export default function NftLinkBoard(props) {
             {linkStatus.dangerous.length > 0 ?
               <div className="mb-8 flex flex-col gap-y-3 w-full">
                 <div className="flex gap-x-3 justify-between items-center">
-                  <label className="shrink truncate font-flow font-bold text-2xl">Dangerously Linked</label>
+                  <label className="shrink truncate font-flow font-bold text-xl sm:text-2xl">Dangerously Linked</label>
                   <button
                     className={
                       classNames(
@@ -119,7 +119,7 @@ export default function NftLinkBoard(props) {
             {linkStatus.bad.length > 0 ?
               <div className="mb-8 flex flex-col gap-y-3 w-full">
                 <div className="flex gap-x-3 justify-between items-center">
-                  <label className="shrink truncate font-flow font-bold text-2xl">Not Correctly Linked</label>
+                  <label className="shrink truncate font-flow font-bold text-xl sm:text-2xl">Not Correctly Linked</label>
                   <button
                     className={
                       classNames(
@@ -156,7 +156,7 @@ export default function NftLinkBoard(props) {
                     setShowCorrectlyLinked(!showCorrectlyLinked)
                   }}
                 >
-                  <label className="block font-flow font-bold text-2xl">Correctly Linked</label>
+                  <label className="block font-flow font-bold text-xl sm:text-2xl">Correctly Linked</label>
                   {!showCorrectlyLinked ?
                     <ArrowCircleRightIcon className="text-emerald" width={32} height={32} /> :
                     <ArrowCircleDownIcon className="text-emerald" width={32} height={32} />
@@ -174,7 +174,7 @@ export default function NftLinkBoard(props) {
             {linkStatus.unlinked.length > 0 ?
               <div className="mb-8 flex flex-col gap-y-3 w-full">
                 <div className="flex gap-x-3 justify-between items-center">
-                  <label className="shrink truncate font-flow font-bold text-2xl">Not Linked</label>
+                  <label className="shrink truncate font-flow font-bold text-xl sm:text-2xl">Not Linked</label>
                   <button
                     className={
                       classNames(

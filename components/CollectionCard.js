@@ -48,6 +48,7 @@ export default function CollecitonCard(props) {
       disabledColor = "bg-rose-300 text-white"
       enabledColor = "hover:bg-rose-600 bg-rose-500 text-white"
     }
+
     return (
       <button
         className={
@@ -115,7 +116,7 @@ export default function CollecitonCard(props) {
           </div>
 
           <div className="flex flex-col gap-y-1 shrink truncate">
-            <label className="shrink font-flow font-bold text-lg truncate">{name}</label>
+            <label className="shrink font-flow font-bold text-base sm:text-lg truncate">{name}</label>
             <div className="flex gap-x-1">
               {externalLink ?
                 <a
