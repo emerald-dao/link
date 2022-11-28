@@ -14,7 +14,8 @@
     "@onflow/fcl": "^1.2.0",
     "@onflow/transport-http": "^1.4.0",
     "autoprefixer": "^10.4.8",
-    "next": "12.2.5",
+    "flow-native-token-registry": "^0.1.4",
+    "next": "13.0.5",
     "postcss": "^8.4.16",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -25,6 +26,6 @@
   },
   "devDependencies": {
     "eslint": "8.23.0",
-    "eslint-config-next": "12.2.5"
+    "eslint-config-next": "13.0.5"
   }
 }

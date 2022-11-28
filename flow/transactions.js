@@ -139,7 +139,7 @@ const doRelinkAll = async (metadataArr) => {
     const { storagePath, publicPath, interfaces, collectionType, contracts } = parseCollectionData(collectionData)
 
     const body = `
-        if signer.borrow<&NonFungibleToken.Collection>(from: ${storagePath}) != nil && !signer.getCapability<&${collectionType}{${interfaces}}>(${publicPath}).check() {
+        if signer.borrow<&NonFungibleToken.Collection>(from: ${storagePath}) != nil {
           signer.unlink(${publicPath})
           signer.link<&${collectionType}{${interfaces}}>(${publicPath}, target: ${storagePath})
         }
@@ -188,7 +188,7 @@ const doRelink = async (metadata) => {
   const body = `
   transaction() {
     prepare(signer: AuthAccount) {
-      if signer.borrow<&NonFungibleToken.Collection>(from: ${storagePath}) != nil && !signer.getCapability<&${collectionType}{${interfaces}}>(${publicPath}).check() {
+      if signer.borrow<&NonFungibleToken.Collection>(from: ${storagePath}) != nil {
         signer.unlink(${publicPath})
         signer.link<&${collectionType}{${interfaces}}>(${publicPath}, target: ${storagePath})
       }
@@ -262,6 +262,47 @@ const doBadLink = async (metadata) => {
       if signer.borrow<&NonFungibleToken.Collection>(from: ${storagePath}) == nil {
         signer.save(<- ${contractName}.createEmptyCollection(), to: ${storagePath})
         signer.link<&${collectionType}{NonFungibleToken.CollectionPublic}>(${publicPath}, target: ${storagePath})
+      }
+    }
+  }
+  `
+
+  const code = imports.concat(body)
+
+  const transactionId = await fcl.mutate({
+    cadence: code,
+    proposer: fcl.currentUser,
+    payer: fcl.currentUser,
+    limit: 9999
+  })
+  return transactionId
+}
+
+// TESTONLY
+export const dangerousLink = async (
+  metadata,
+  setTransactionInProgress,
+  setTransactionStatus
+) => {
+  const txFunc = async () => {
+    return await doDangerousLink(metadata)
+  }
+
+  return await txHandler(txFunc, setTransactionInProgress, setTransactionStatus)
+}
+
+// TESTONLY
+const doDangerousLink = async (metadata) => {
+  const contractName = metadata.contractName
+  const collectionData = metadata.collectionData
+  const { storagePath, publicPath, imports, collectionType } = parseCollectionData(collectionData)
+
+  const body = `
+  transaction() {
+    prepare(signer: AuthAccount) {
+      if signer.borrow<&NonFungibleToken.Collection>(from: ${storagePath}) == nil {
+        signer.save(<- ${contractName}.createEmptyCollection(), to: ${storagePath})
+        signer.link<&${collectionType}{NonFungibleToken.CollectionPublic, NonFungibleToken.Provider}>(${publicPath}, target: ${storagePath})
       }
     }
   }

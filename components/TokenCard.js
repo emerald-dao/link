@@ -11,29 +11,22 @@ import { useSWRConfig } from 'swr'
 import { classNames, getImageSrcFromMetadataViewsFile, getIPFSFileURL, ipfs, isWhitelistedImage } from "../lib/utils"
 import { GlobeAltIcon } from "@heroicons/react/outline"
 import { useEffect, useState } from "react"
+import { ftBadlink, ftDangerousLink, ftRelink, ftSetupAccount } from "../flow/ft-transactions"
 
 const MAX_BULK_SIZE = 20
 
-export default function CollectionCard(props) {
+export default function TokenCard(props) {
   const [transactionInProgress, setTransactionInProgress] = useRecoilState(transactionInProgressState)
   const [, setTransactionStatus] = useRecoilState(transactionStatusState)
   const [, setShowBasicNotification] = useRecoilState(showBasicNotificationState)
   const [, setBasicNotificationContent] = useRecoilState(basicNotificationContentState)
   const { mutate } = useSWRConfig()
 
-  const { name, metadata, type, account, catalog, isSelectable, selectedUnlinked, setSelectedUnlinked } = props
+  const { token, type, account, registry, isSelectable, selectedUnlinked, setSelectedUnlinked } = props
   const [selected, setSelected] = useState(false)
   const selectable = isSelectable == true
 
-  const [imageSrc, setImageSrc] = useState(null)
-
-  useEffect(() => {
-    let squareImageFile = metadata.collectionDisplay.squareImage.file
-    let src = getImageSrcFromMetadataViewsFile(squareImageFile)
-    setImageSrc(src)
-  }, [metadata])
-
-  const getButton = (type, metadata, account, catalog) => {
+  const getButton = (token, type, account, registry) => {
     if (type == "good") {
       return null
     }
@@ -58,15 +51,15 @@ export default function CollectionCard(props) {
             "absolute right-4 top-[22px] shrink-0 truncate font-flow text-base shadow-sm font-bold w-[100px] rounded-full px-3 py-2 leading-5"
           )}
         disabled={transactionInProgress || selected}
-        onClick={async (event) => {
+        onClick={async () => {
           if (type == "bad") {
-            await relink(metadata, setTransactionInProgress, setTransactionStatus)
+            await ftRelink(token, setTransactionInProgress, setTransactionStatus)
           } else if (type == "unlinked") {
-            await setupAccount(metadata, setTransactionInProgress, setTransactionStatus)
+            await ftSetupAccount(token, setTransactionInProgress, setTransactionStatus)
           } else if (type == "dangerous") {
-            await relink(metadata, setTransactionInProgress, setTransactionStatus)
+            await ftRelink(token, setTransactionInProgress, setTransactionStatus)
           }
-          mutate(["linkStatusFetcher", account, catalog])
+          mutate(["ftLinkStatusFetcher", account, registry])
         }}
       >
         {title}
@@ -74,15 +67,10 @@ export default function CollectionCard(props) {
     )
   }
 
-  const externalURL = metadata.collectionDisplay.externalURL
-  let externalLink = null
-  if (externalURL && externalURL.url.trim() != '') {
-    externalLink = externalURL.url
-  }
-
-  const socials = metadata.collectionDisplay.socials
-  const twitter = socials.twitter && socials.twitter.url.trim() != '' ? socials.twitter.url : null
-  const discord = socials.discord && socials.discord.url.trim() != '' ? socials.discord.url : null
+  const extensions = token.extensions
+  const externalLink = extensions.website
+  const twitter = extensions.twitter
+  const discord = extensions.discord
 
   const selectedLength = selectedUnlinked ? Object.values(selectedUnlinked).filter((c) => c).length : 0
 
@@ -103,21 +91,21 @@ export default function CollectionCard(props) {
           }
           let _selectedUnlinked = Object.assign({}, selectedUnlinked)
           if (selected) {
-            _selectedUnlinked[name] = false
+            _selectedUnlinked[token.id] = false
           } else {
-            _selectedUnlinked[name] = true
+            _selectedUnlinked[token.id] = true
           }
           setSelected(!selected)
           setSelectedUnlinked(_selectedUnlinked)
         }}
       >
         <div className='shrink truncate flex gap-x-2 items-center'>
-          <div className="h-[48px] w-[48px] shrink-0 relative rounded-xl overflow-hidden border-emerald border">
-            {imageSrc ? <Image src={imageSrc} placeholder="blur" blurDataURL="/link.png" alt="/link.png" fill sizes="10vw" className="object-contain" /> : null}
+          <div className="h-[48px] w-[48px] shrink-0 relative rounded-full overflow-hidden border-emerald border">
+            {token.logoURI ? <Image src={token.logoURI} placeholder="blur" blurDataURL="/link.png" alt="/link.png" fill sizes="10vw" className="object-contain" /> : null}
           </div>
 
           <div className="flex flex-col gap-y-1 shrink truncate">
-            <label className="shrink font-flow font-bold text-base sm:text-lg truncate">{name}</label>
+            <label className="shrink font-flow font-bold text-base sm:text-lg truncate">{token.symbol}</label>
             <div className="flex gap-x-1">
               {externalLink ?
                 <a
@@ -157,7 +145,7 @@ export default function CollectionCard(props) {
         <div className="w-[100px] shrink-0">
         </div>
       </button>
-      {getButton(type, metadata, account, catalog)}
+      {getButton(token, type, account, registry)}
     </div>
   )
 }

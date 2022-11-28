@@ -1,87 +1,17 @@
 import Head from 'next/head'
-import { useEffect, useState } from 'react'
-import useSWR, {useSWRConfig} from 'swr'
-import { getLinkStatus, getNFTCatalog } from '../flow/scripts'
-import ErrorPage from './error'
-import { SpinnerCircular } from 'spinners-react'
 import * as fcl from "@onflow/fcl"
-import { ArrowCircleDownIcon, ArrowCircleRightIcon } from '@heroicons/react/outline'
-import CollecitonCard from '../components/CollectionCard'
-import { useRecoilState } from "recoil"
-import {
-  transactionInProgressState,
-  transactionStatusState
-} from "../lib/atoms"
-import { classNames } from '../lib/utils'
-import { bulkSetupAccount, relinkAll } from '../flow/transactions'
+
 import Link from 'next/link'
-
-const catalogFetcher = async (funcName) => {
-  return await getNFTCatalog()
-}
-
-const linkStatusFetcher = async (funcName, account, catalog) => {
-  return await getLinkStatus(account, catalog)
-}
-
-// There are some records with duplicate contractName
-// contracts with duplicate contractName can't be imported in
-// the same cadence code, so we just handle the first one
-const sortObject = o => Object.keys(o).sort().reduce((r, k) => (r[k] = o[k], r), {})
-
-const filterCatalog = (catalog) => {
-  let cleaned = {}
-  let contractNames = {}
-  for (const [catalogName, metadata] of Object.entries(catalog)) {
-    if (!contractNames[metadata.contractName]) {
-      contractNames[metadata.contractName] = true
-      cleaned[catalogName] = metadata
-    }
-  }
-  return sortObject(cleaned)
-}
+import NftLinkBoard from '../components/NftLinkBoard'
+import { useState } from 'react'
+import { classNames } from '../lib/utils'
+import FtLinkBoard from '../components/FtLinkBoard'
 
 export default function Home(props) {
-  const [transactionInProgress, setTransactionInProgress] = useRecoilState(transactionInProgressState)
-  const [, setTransactionStatus] = useRecoilState(transactionStatusState)
-
-  const { mutate } = useSWRConfig()
-
   const user = props.user
   const account = user && user.loggedIn ? user.addr : null
 
-  const { data: catalogData, error: catalogError } = useSWR(account ? ["catalogFetcher"] : null, catalogFetcher)
-  const [catalog, setCatalog] = useState(null)
-  const [showCorrectlyLinked, setShowCorrectlyLinked] = useState(false)
-  const [linkStatus, setLinkStatus] = useState(null)
-  const [selectedUnlinked, setSelectedUnlinked] = useState({})
-
-  useEffect(() => {
-    if (!account) {
-      setSelectedUnlinked({})
-    }
-  }, [account])
-
-  useEffect(() => {
-    if (catalogData) {
-      setCatalog(filterCatalog(catalogData))
-    }
-  }, [catalogData])
-
-  const { data: statusData, error: statusError } = useSWR(
-    (catalog && account) ? ["linkStatusFetcher", account, catalog] : null, linkStatusFetcher)
-
-  useEffect(() => {
-    if (statusData) { setLinkStatus(statusData) }
-  }, [statusData])
-
-  if (catalogError) {
-    return <ErrorPage code={catalogError.statusCode} title={"Get NFTCatalog Failed"} detail={"Please check you network status and try again"} />
-  }
-
-  if (statusError) {
-    return <ErrorPage code={statusError.statusCode} title={"Get Link Status Failed"} detail={"Please check you network status and try again"} />
-  }
+  const [showNftBoard, setShowNftBoard] = useState(true)
 
   return (
     <div className="container mx-auto max-w-[920px] min-w-[380px] px-6">
@@ -99,7 +29,7 @@ export default function Home(props) {
             <label className="font-flow text-base sm:text-lg">smoother with the right link</label>
             <Link href="/about">
               <label className="text-emerald font-bold cursor-pointer">
-              👉Click to know more👈
+                👉Click to know more👈
               </label>
             </Link>
           </div>
@@ -114,117 +44,72 @@ export default function Home(props) {
         : null
       }
       {
-        account && linkStatus ?
-          <div>
-            {linkStatus.bad.length > 0 ?
-              <div className="mb-8 flex flex-col gap-y-3 w-full">
-                <div className="flex gap-x-3 justify-between items-center">
-                  <label className="shrink truncate font-flow font-bold text-2xl">Not Correctly Linked</label>
-                  <button
-                    className={
-                      classNames(
-                        transactionInProgress ? "bg-emerald-light text-gray-500" : "hover:bg-emerald-dark bg-emerald text-black",
-                        "shrink-0 truncate font-flow text-base shadow-sm font-bold w-[120px] rounded-full px-3 py-2 leading-5"
-                      )}
-                    disabled={transactionInProgress}
-                    onClick={async () => {
-                      const metadataArr = linkStatus.bad.map((catalogName) => {
-                        return catalog[catalogName]
-                      })
-
-                      await relinkAll(metadataArr, setTransactionInProgress, setTransactionStatus)
-                      mutate(["linkStatusFetcher", account, catalog])
-                    }}
-                  >
-                    RELINK ALL
-                  </button>
-                </div>
-                {
-                  linkStatus.bad.map((name) => {
-                    const metadata = catalog[name]
-                    return (<CollecitonCard key={name} name={name} metadata={metadata} type={"bad"} account={account} catalog={catalog} />)
-                  })
+        account ?
+          <div className="w-full flex justify-center mb-8">
+            <div className="flex gap-x-1 bg-emerald-light w-80 h-10
+        rounded-lg justify-center p-1
+        ">
+              <button
+                className={classNames(
+                  showNftBoard ? "bg-emerald text-black" : "bg-emerald-light text-gray-500",
+                  `basis-1/2 rounded-md font-flow font-semibold`
+                )
                 }
-              </div>
-              : null
-            }
-            {linkStatus.good.length > 0 ?
-              <div className="mb-8 flex flex-col gap-y-3 w-full">
-                <button
-                  className="flex justify-between"
-                  onClick={() => {
-                    setShowCorrectlyLinked(!showCorrectlyLinked)
-                  }}
-                >
-                  <label className="block font-flow font-bold text-2xl">Correctly Linked</label>
-                  {!showCorrectlyLinked ?
-                    <ArrowCircleRightIcon className="text-emerald" width={32} height={32} /> :
-                    <ArrowCircleDownIcon className="text-emerald" width={32} height={32} />
+                onClick={() => {
+                  if (!showNftBoard) {
+                    setShowNftBoard(true)
                   }
-                </button>
-                {showCorrectlyLinked ?
-                  linkStatus.good.map((name) => {
-                    const metadata = catalog[name]
-                    return (<CollecitonCard key={name} name={name} metadata={metadata} type={"good"} account={account} catalog={catalog} />)
-                  })
-                  : null}
-              </div>
-              : null
-            }
-            {linkStatus.unlinked.length > 0 ?
-              <div className="mb-8 flex flex-col gap-y-3 w-full">
-                <div className="flex gap-x-3 justify-between items-center">
-                  <label className="shrink truncate font-flow font-bold text-2xl">Not Linked</label>
-                  <button
-                    className={
-                      classNames(
-                        (transactionInProgress || Object.values(selectedUnlinked).filter((c) => c).length == 0) ? "bg-emerald-light text-gray-500" : "hover:bg-emerald-dark bg-emerald text-black",
-                        "shrink-0 truncate font-flow text-base shadow-sm font-bold w-[170px] rounded-full px-3 py-2 leading-5"
-                      )}
-                    disabled={transactionInProgress || Object.values(selectedUnlinked).filter((c) => c).length == 0}
-                    onClick={async () => {
-                      const metadataArr = []
-                      for (const [name, selected] of Object.entries(selectedUnlinked)) {
-                        if (selected && linkStatus.unlinked.includes(name)) {
-                          metadataArr.push(catalog[name])
-                        }
-                      }
-
-                      await bulkSetupAccount(metadataArr, setTransactionInProgress, setTransactionStatus)
-                      setSelectedUnlinked({})
-                      mutate(["linkStatusFetcher", account, catalog])
-                    }}
-                  >
-                    {`BULK SETUP (${Object.values(selectedUnlinked).filter((c) => c).length})`}
-                  </button>
-                </div>
-                {
-                  linkStatus.unlinked.map((name) => {
-                    const metadata = catalog[name]
-                    return (<CollecitonCard 
-                      key={name} 
-                      name={name} 
-                      metadata={metadata} 
-                      type={"unlinked"} 
-                      account={account} 
-                      catalog={catalog} 
-                      isSelectable={true} 
-                      selectedUnlinked={selectedUnlinked}
-                      setSelectedUnlinked={setSelectedUnlinked}
-                    />)
-                  })
+                }}
+              >
+                NFT
+              </button>
+              <button
+                className={classNames(
+                  !showNftBoard ? "bg-emerald text-black" : "bg-emerald-light text-gray-500",
+                  `basis-1/2 rounded-md font-flow font-semibold`
+                )
                 }
-              </div>
-              : null}
-
+                onClick={() => {
+                  if (showNftBoard) {
+                    setShowNftBoard(false)
+                  }
+                }}
+              >
+                FT
+              </button>
+            </div>
+          </div> : null
+      }
+      {
+        account ? (
+         showNftBoard ?
+          <div className='flex flex-col gap-y-10'>
+            <label className='px-10'>The collections listed here are fetched from
+              <a
+                href="https://www.flow-nft-catalog.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-flow text-sm whitespace-pre"
+              >
+                &nbsp;<span className="underline font-bold decoration-emerald decoration-2">NFTCatalog</span>
+              </a>
+              . If you want your project to be listed, please submit a proposal to it</label>
+            <NftLinkBoard account={account} />
+          </div> :
+          <div className='flex flex-col gap-y-10'>
+            <label className='px-10'>The tokens listed here are fetched from
+              <a
+                href="https://github.com/FlowFans/flow-token-list"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-flow text-sm whitespace-pre"
+              >
+                &nbsp;<span className="underline font-bold decoration-emerald decoration-2">FlowTokenList</span>
+              </a>
+              . If you want your project to be listed, please submit a proposal to it</label>
+            <FtLinkBoard account={account} />
           </div>
-          : <>
-            {account ?
-              <div className="flex h-[200px] mt-10 justify-center">
-                <SpinnerCircular size={50} thickness={180} speed={100} color="#38E8C6" secondaryColor="#e2e8f0" />
-              </div>
-              : null}
-          </>
+        ) : null
       }
     </div>
   )
