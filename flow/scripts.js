@@ -34,6 +34,13 @@ export const getLinkStatus = async(account, catalog) => {
     } else {
       acc.unlinked = current.unlinked
     }
+
+    if (acc.dangerous) {
+      acc.dangerous = acc.dangerous.concat(current.dangerous)
+    } else {
+      acc.dangerous = current.dangerous
+    }
+
     return acc
   }, {})
 
@@ -63,11 +70,13 @@ const genlinkCheckerScript = (catalog) => {
     pub let good: [String]
     pub let bad: [String]
     pub let unlinked: [String]
+    pub let dangerous: [String]
 
-    init(good: [String], bad: [String], unlinked: [String]) {
+    init(good: [String], bad: [String], unlinked: [String], dangerous: [String]) {
       self.good = good
       self.bad = bad
       self.unlinked = unlinked
+      self.dangerous = dangerous
     }
   }
 
@@ -76,6 +85,7 @@ const genlinkCheckerScript = (catalog) => {
     let good: [String] = []
     let bad: [String] = []
     let unlinked: [String] = []
+    let dangerous: [String] = []
   `
   const contracts = {}
   for (const [catalogName, metadata] of Object.entries(catalog)) {
@@ -103,6 +113,9 @@ const genlinkCheckerScript = (catalog) => {
     if account.borrow<&NonFungibleToken.Collection>(from: ${storagePath}) == nil {
       unlinked.append("${catalogName}")
     } else {
+      if account.getCapability<&${type}{NonFungibleToken.Provider}>(${publicPath}).check() {
+        dangerous.append("${catalogName}")
+      }
       if account.getCapability<&${type}{${interfaces}}>(${publicPath}).check() {
         good.append("${catalogName}")
       } else {
@@ -114,7 +127,7 @@ const genlinkCheckerScript = (catalog) => {
   }
 
   code = code.concat(`
-    return Result(good: good, bad: bad, unlinked: unlinked)
+    return Result(good: good, bad: bad, unlinked: unlinked, dangerous: dangerous)
   }
   `)
 

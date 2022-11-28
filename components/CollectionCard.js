@@ -1,6 +1,6 @@
 import Image from "next/image"
 import { useRecoilState } from "recoil"
-import { badlink, relink, setupAccount } from "../flow/transactions"
+import { badlink, dangerousLink, relink, setupAccount } from "../flow/transactions"
 import {
   transactionInProgressState,
   transactionStatusState,
@@ -41,11 +41,18 @@ export default function CollecitonCard(props) {
     if (type == "unlinked") {
       title = "SETUP"
     }
+
+    let disabledColor = "bg-emerald-light text-gray-500"
+    let enabledColor = "hover:bg-emerald-dark bg-emerald text-black"
+    if (type == "dangerous") {
+      disabledColor = "bg-rose-300 text-white"
+      enabledColor = "hover:bg-rose-600 bg-rose-500 text-white"
+    }
     return (
       <button
         className={
           classNames(
-            transactionInProgress || selected ? "bg-emerald-light text-gray-500" : "hover:bg-emerald-dark bg-emerald text-black",
+            transactionInProgress || selected ? disabledColor : enabledColor,
             "absolute right-4 top-[22px] shrink-0 truncate font-flow text-base shadow-sm font-bold w-[100px] rounded-full px-3 py-2 leading-5"
           )}
         disabled={transactionInProgress || selected}
@@ -54,6 +61,8 @@ export default function CollecitonCard(props) {
             await relink(metadata, setTransactionInProgress, setTransactionStatus)
           } else if (type == "unlinked") {
             await setupAccount(metadata, setTransactionInProgress, setTransactionStatus)
+          } else if (type == "dangerous") {
+            await relink(metadata, setTransactionInProgress, setTransactionStatus)
           }
           mutate(["linkStatusFetcher", account, catalog])
         }}
