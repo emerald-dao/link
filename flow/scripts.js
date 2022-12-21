@@ -51,7 +51,7 @@ const splitCatalog = (catalog) => {
   const catalogs = []
   let currentCatalog = {}
   for (const [catalogName, metadata] of Object.entries(catalog)) {
-    if (Object.keys(currentCatalog).length >= 40) {
+    if (Object.keys(currentCatalog).length >= 35) {
       const c = Object.assign({}, currentCatalog)
       catalogs.push(c)
       currentCatalog = {}
@@ -264,9 +264,7 @@ const splitList = (list, chunkSize) => {
 // --- NFT Catalog ---
 
 export const bulkGetNftCatalog = async () => {
-  const collectionIdentifiers = (await getCollectionIdentifiers()).filter((c) => {
-    return c != "Gamisodes"
-  })
+  const collectionIdentifiers = await getCollectionIdentifiers()
   const groups = splitList(collectionIdentifiers, 50)
   const promises = groups.map((group) => {
     return getNftCatalogByCollectionIDs(group)
