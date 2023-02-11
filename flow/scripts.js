@@ -304,7 +304,9 @@ export const getNftCatalogByCollectionIDs = async (collectionIDs) => {
 }
 
 const getCollectionIdentifiers = async () => {
-  const typeData = await getCatalogTypeData()
+  console.log("Hello")
+  const typeData = (await getCatalogTypeData());
+  delete typeData["A.e4cf4bdc1751c65d.PackNFT.NFT"];
 
   const collectionData = Object.values(typeData)
   const collectionIdentifiers = []
