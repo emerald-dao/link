@@ -274,6 +274,7 @@ export const bulkGetNftCatalog = async () => {
   const items = itemGroups.reduce((acc, current) => {
     return Object.assign(acc, current)
   }, {})
+  console.log(items)
   return items
 }
 
@@ -304,9 +305,11 @@ export const getNftCatalogByCollectionIDs = async (collectionIDs) => {
 }
 
 const getCollectionIdentifiers = async () => {
-  console.log("Hello")
   const typeData = (await getCatalogTypeData());
+  // go to network -> see which one is failing, delete that one
   delete typeData["A.e4cf4bdc1751c65d.PackNFT.NFT"];
+  delete typeData["A.921ea449dffec68a.Flovatar.NFT"];
+  delete typeData["A.921ea449dffec68a.Flobot.NFT"];
 
   const collectionData = Object.values(typeData)
   const collectionIdentifiers = []
