@@ -264,7 +264,10 @@ const splitList = (list, chunkSize) => {
 // --- NFT Catalog ---
 
 export const bulkGetNftCatalog = async () => {
-  const collectionIdentifiers = await getCollectionIdentifiers()
+  let collectionIdentifiers = await getCollectionIdentifiers()
+  collectionIdentifiers = collectionIdentifiers.filter((c) => {
+    return !["NFLAllDayPacks"].includes(c)
+  })
   const groups = splitList(collectionIdentifiers, 50)
   const promises = groups.map((group) => {
     return getNftCatalogByCollectionIDs(group)

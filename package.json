@@ -11,7 +11,7 @@
   "dependencies": {
     "@headlessui/react": "^1.6.6",
     "@heroicons/react": "v1",
-    "@onflow/fcl": "^1.2.0",
+    "@onflow/fcl": "^1.6.0",
     "@onflow/transport-http": "^1.4.0",
     "autoprefixer": "^10.4.8",
     "flow-native-token-registry": "^0.1.4",
