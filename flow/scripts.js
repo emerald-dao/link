@@ -198,12 +198,21 @@ const genLinkCheckerScript = (catalog) => {
     const storagePath = `/${collectionData.storagePath.domain}/${collectionData.storagePath.identifier}`
     const publicPath = `/${collectionData.publicPath.domain}/${collectionData.publicPath.identifier}`
 
-    const typeID = collectionData.publicLinkedType.type.typeID
+    var typeID 
+    if (collectionData.publicLinkedType.type.type == "") {
+      typeID = collectionData.publicLinkedType.type.typeID
+    } else {
+      typeID = collectionData.publicLinkedType.type.type.typeID
+    }
+
     const [, address, name, interf] = typeID.split(".")
     contracts[name] = address
+    if (name == "PackNFT") {
+      continue
+    }
     const type = `${name}.${interf}`
 
-    const restrictions = collectionData.publicLinkedType.restrictions
+    const restrictions = collectionData.publicLinkedType.restrictions || collectionData.publicLinkedType.type.restrictions
     const interfacesArr = []
     for (let i = 0; i < restrictions.length; i++) {
       const r = restrictions[i].typeID
@@ -221,7 +230,8 @@ const genLinkCheckerScript = (catalog) => {
       if account.getCapability<&${type}{NonFungibleToken.Provider}>(${publicPath}).check() {
         dangerous.append("${catalogName}")
       }
-      if account.getCapability<&${type}{${interfaces}}>(${publicPath}).check() {
+      let cap = account.getCapability<&${type}{${interfaces}}>(${publicPath})
+      if cap.check() {
         good.append("${catalogName}")
       } else {
         bad.append("${catalogName}")
