@@ -325,12 +325,17 @@ const parseCollectionData = (collectionData) => {
 
   const contracts = {}
 
-  const typeID = collectionData.publicLinkedType.type.typeID
+  var typeID 
+  if (collectionData.publicLinkedType.type.type == "") {
+    typeID = collectionData.publicLinkedType.type.typeID
+  } else {
+    typeID = collectionData.publicLinkedType.type.type.typeID
+  }
   const [, address, name, interf] = typeID.split(".")
   contracts[name] = address
   const type = `${name}.${interf}`
 
-  const restrictions = collectionData.publicLinkedType.restrictions
+  const restrictions = collectionData.publicLinkedType.restrictions || collectionData.publicLinkedType.type.restrictions
   const interfacesArr = []
   for (let i = 0; i < restrictions.length; i++) {
     const r = restrictions[i].typeID
