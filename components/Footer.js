@@ -24,7 +24,7 @@ export default function Footer() {
         </div>
 
         <a
-          href="https://discord.com/invite/emeraldcity"
+          href="https://discord.com/invite/emerald-city-906264258189332541"
           target="_blank"
           rel="noopener noreferrer"
           className="font-flow text-sm whitespace-pre"

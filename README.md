@@ -9,4 +9,4 @@ This is a DApp meant to help users re-link all of their collections that are not
 Go to [Flow NFT Catalog](https://www.flow-nft-catalog.com/) to submit your collection
 
 ## 💎 Created by Emerald City DAO
-Join our [Discord](https://discord.gg/emeraldcity)
+Join our [Discord](https://discord.com/invite/emerald-city-906264258189332541)

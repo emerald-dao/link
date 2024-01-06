@@ -25,13 +25,13 @@ export default function About(props) {
           Emerald Academy
         </a>
         &nbsp;or ask in the&nbsp;
-        <a href="https://discord.com/invite/emeraldcity"
+        <a href="https://discord.com/invite/emerald-city-906264258189332541"
           target="_blank"
           rel="noopener noreferrer"
           className="underline decoration-emerald font-bold decoration-2">
           Emerald City Discord
         </a>
-      .</p>
+        .</p>
     </div>
   )
 }
