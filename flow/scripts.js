@@ -207,9 +207,10 @@ const genLinkCheckerScript = (catalog) => {
 
     const [, address, name, interf] = typeID.split(".")
     contracts[name] = address
-    if (name == "PackNFT") {
+    if (name == "PackNFT" || name == "FantastecNFT") {
       continue
     }
+
     const type = `${name}.${interf}`
 
     const restrictions = collectionData.publicLinkedType.restrictions || collectionData.publicLinkedType.type.restrictions
